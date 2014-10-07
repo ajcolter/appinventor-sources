@@ -180,27 +180,28 @@ public final class ErrorMessages {
   //FusiontablesControl errors
   public static final int FUSION_TABLES_QUERY_ERROR = 2601;
 
+
   //TextToSpeech errors
   public static final int ERROR_TTS_NOT_READY = 2701;
 
   // AndroidViewComponent errors
   public static final int ERROR_BAD_PERCENT = 2801;
 
-  // 2901-2999 are reserved for FIRST Tech Challenge.
-  // Map errors
-  public static final int ERROR_ILLEGAL_INITIAL_CORDS_FORMAT = 2701;
-  public static final int ERROR_ILLEGAL_COORDS_FORMAT = 2702;
-  public static final int ERROR_PARSING_MARKERS_LIST = 2703;
-  public static final int ERROR_INVALID_MARKER = 2704;
-  public static final int ERROR_INVALID_ZOOM_LEVEL = 2705;
-  public static final int ERROR_NO_GEOLOCATION_RESULTS = 2706;
-
-  // Please start the next group of error numbers at 2801.
-
   // Image errors
   public static final int ERROR_IMAGE_CANNOT_ROTATE = 3001;
 
+  // 2901-2999 are reserved for FIRST Tech Challenge.
   // Start the next group of errors at 3100
+
+  // WebMap errors
+  public static final int ERROR_ILLEGAL_INITIAL_CORDS_FORMAT = 3101;
+  public static final int ERROR_ILLEGAL_COORDS_FORMAT = 3102;
+  public static final int ERROR_PARSING_MARKERS_LIST = 3103;
+  public static final int ERROR_INVALID_MARKER = 3104;
+  public static final int ERROR_INVALID_ZOOM_LEVEL = 3105;
+  public static final int ERROR_NO_GEOLOCATION_RESULTS = 3106;
+
+  // Please start the next group of error numbers at 3201.
 
   // Mapping of error numbers to error message format strings.
   private static final Map<Integer, String> errorMessages;
@@ -481,7 +482,7 @@ public final class ErrorMessages {
     // Image errors
     errorMessages.put(ERROR_IMAGE_CANNOT_ROTATE,
         "The version of Android on this device does not support image rotation.");
-    //Map errors
+    //WebMap errors
     errorMessages.put(ERROR_ILLEGAL_INITIAL_CORDS_FORMAT, "The format for the initial location is " +
         "invalid. Using default Initial Location.");
     errorMessages.put(ERROR_ILLEGAL_COORDS_FORMAT, "The coordinates provided are invalid. Latitude" +
@@ -503,4 +504,3 @@ public final class ErrorMessages {
     return String.format(format, messageArgs);
   }
 }
-

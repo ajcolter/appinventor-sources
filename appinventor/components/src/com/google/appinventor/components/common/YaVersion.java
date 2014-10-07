@@ -377,7 +377,9 @@ public class YaVersion {
   // For YOUNG_ANDROID_VERSION 149:
   // - CLOCK_COMPONENT_VERSION was incremented to 3
 
+
   public static final int YOUNG_ANDROID_VERSION = 149;
+  // - WEBMAP_VERSION was incremented to 1
 
   // ............................... Blocks Language Version Number ...............................
 
