@@ -77,6 +77,8 @@ public class TranslationDesignerPallete {
       value = MESSAGES.timePickerComponentPallette();
     } else if (key.equals("TinyDB")) {
       value = MESSAGES.tinyDBComponentPallette();
+    } else if (key.equals("WebMap")) {
+      value = MESSAGES.webMapComponentPallette();
       // Media
     } else if (key.equals("Camcorder")) {
       value = MESSAGES.camcorderComponentPallette();

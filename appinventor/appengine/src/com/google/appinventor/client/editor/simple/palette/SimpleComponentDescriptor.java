@@ -36,8 +36,10 @@ import com.google.appinventor.client.editor.simple.components.MockTableArrangeme
 import com.google.appinventor.client.editor.simple.components.MockTextBox;
 import com.google.appinventor.client.editor.simple.components.MockVerticalArrangement;
 import com.google.appinventor.client.editor.simple.components.MockVideoPlayer;
+import com.google.appinventor.client.editor.simple.components.MockWebMap;
 import com.google.appinventor.client.editor.simple.components.MockWebViewer;
 import com.google.appinventor.client.editor.simple.components.MockSpinner;
+
 import com.google.common.collect.Maps;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
@@ -316,6 +318,8 @@ public final class SimpleComponentDescriptor {
       return new MockVideoPlayer(editor);
     } else if (name.equals(MockWebViewer.TYPE)) {
       return new MockWebViewer(editor);
+    } else if (name.equals(MockWebMap.TYPE)) {
+      return new MockWebMap(editor);
     } else if (name.equals(MockSpinner.TYPE)) {
       return new MockSpinner(editor);
     } else {

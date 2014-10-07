@@ -964,6 +964,8 @@ public class YaVersion {
   // - Added method XMLTextDecode
   public static final int WEB_COMPONENT_VERSION = 4;
 
+  public static final int WEBMAP_COMPONENT_VERSION = 1;
+
   // For WEBVIEWER_COMPONENT_VERSION 2:
   // - The CanGoForward and CanGoBack methods were added
   // For WEBVIEWER_COMPONENT_VERSION 3:

@@ -426,6 +426,20 @@ public interface Images extends Resources {
   ImageResource webviewerbig();
 
   /**
+   * Designer palette item: WebMap component
+   */
+  @Source("com/google/appinventor/images/webmap.png")
+  ImageResource webmap();
+
+  /**
+   * Designer item: WebMap component in designer
+   */
+  // The image here is public domain and comes from
+  // http://www.userlogos.org/files/logos/mcfer2k/google_maps1.png
+  @Source("com/google/appinventor/images/webmapbig.png")
+  ImageResource webmapbig();
+
+  /**
    * Designer palette item: Web component
    */
   @Source("com/google/appinventor/images/web.png")
