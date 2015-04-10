@@ -14,6 +14,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.components.runtime.util.ElementsUtil;
 import com.google.appinventor.components.runtime.util.YailList;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -129,7 +130,7 @@ public class WebMap extends AndroidViewComponent {
 
   @SimpleProperty(description = "Google Maps API key. This key is not mandatory, " +
       "but the app might stop functioning at any time if it's not provided. Note that Google " +
-      "imposes a limit of 25.000 calls a day for the free maps API. Keys can be obtained at: " +
+      "imposes a limit of 25,000 calls a day for the free maps API. Keys can be obtained at: " +
       "https://console.developers.google.com, and more information about quotas can be accessed " +
       "at: https://developers.google.com/maps/documentation/javascript/usage")
   public String GoogleMapsKey() {
@@ -240,8 +241,7 @@ public class WebMap extends AndroidViewComponent {
         "        padding: 0px\n" +
         "      }\n" +
         "    </style>\n" +
-        "    <script src=\"https://maps.googleapis.com/maps/api/js?v=3.exp" + mapKey +
-        "\"></script>\n" +
+        "    <script src=\"https://maps.googleapis.com/maps/api/js?v=3.exp\"></script>\n" +
         "    <script>\n" +
         "      /**\n" +
         "       * This map script is an abstraction of a number of functions from the Google maps\n" +
@@ -267,8 +267,7 @@ public class WebMap extends AndroidViewComponent {
         "          if (marker instanceof google.maps.Marker){\n" +
         "            this.marker = marker;\n" +
         "            this.id = marker.getPosition().toString(); //Use position as unique id\n" +
-        "          }\n" +
-        "          else {\n" +
+        "          } else {\n" +
         "            console.log('Calling Error handler on Android side - Invalid Marker');\n" +
         "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_INVALID_MARKER);\n" +
         "          }\n" +
@@ -304,8 +303,7 @@ public class WebMap extends AndroidViewComponent {
         "              if (infoWindowContent && marker.info){\n" +
         "                marker.info.setContent(infoWindowContent);\n" +
         "              }\n" +
-        "            }\n" +
-        "            else {\n" +
+        "            } else {\n" +
         "              marker = new google.maps.Marker({\n" +
         "                position: location,\n" +
         "                title: title || '',\n" +
@@ -322,8 +320,7 @@ public class WebMap extends AndroidViewComponent {
         "                createInfoWindow(theId, infoWindowContent);\n" +
         "              }\n" +
         "            }\n" +
-        "          }\n" +
-        "          else {\n" +
+        "          } else {\n" +
         "            console.log('Calling Error handler on Android side');\n" +
         "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);\n" +
         "          }\n" +
@@ -342,9 +339,8 @@ public class WebMap extends AndroidViewComponent {
         "          var markerJson = createJsonMarkerFromId(markerId);\n" +
         "          if (doubleClick)\n" +
         "            androidObject.sendDoubleMarkerToAndroid(markerJson);\n" +
-        "          else{\n" +
+        "          else\n" +
         "            androidObject.sendMarkerToAndroid(markerJson);\n" +
-        "          }\n" +
         "        }\n" +
         "\n" +
         "        function createJsonMarkerFromId(markerId){\n" +
@@ -378,10 +374,9 @@ public class WebMap extends AndroidViewComponent {
         "         */\n" +
         "        var addMarkersFromList = function(listOfMarkers) {\n" +
         "          var allMarkers = [];\n" +
-        "          try{\n" +
+        "          try {\n" +
         "            allMarkers = JSON.parse(listOfMarkers);\n" +
-        "          }\n" +
-        "          catch(parseError) {\n" +
+        "          } catch(parseError) {\n" +
         "            console.log('List of Markers is not valid JSON. Notifying Android side.');\n" +
         "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_PARSING_MARKERS_LIST)\n" +
         "          }\n" +
@@ -422,17 +417,17 @@ public class WebMap extends AndroidViewComponent {
         "\n" +
         "        var locationFromLatLngCoords = function(lat, lng){\n" +
         "          var errorParsing = false;\n" +
-        "\n" +
+        "          //DO WE NEED TO DO THIS? the LatLng will wrap the coordinates. \n" +
         "          if (isNaN(lat) || isNaN(lng)) errorParsing = true;\n" +
         "          if (lat < -90 || lat > 90) errorParsing = true;\n" +
         "          if (lng < -180 || lng > 180) errorParsing = true;\n" +
         "\n" +
-        "          if (errorParsing){\n" +
+        "          if (errorParsing) {\n" +
         "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);\n" +
         "            return null;\n" +
-        "          }\n" +
-        "          else\n" +
+        "          } else {\n" +
         "            return new google.maps.LatLng(lat, lng);\n" +
+        "          }\n" +
         "\n" +
         "        };\n" +
         "\n" +
@@ -451,8 +446,7 @@ public class WebMap extends AndroidViewComponent {
         "            lat = parseFloat(locationSplit[0]);\n" +
         "            lng = parseFloat(locationSplit[1]);\n" +
         "            return locationFromLatLngCoords(lat, lng);\n" +
-        "          }\n" +
-        "          else {\n" +
+        "          } else {\n" +
         "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);\n" +
         "            return null;\n" +
         "          }\n" +
@@ -465,8 +459,7 @@ public class WebMap extends AndroidViewComponent {
         "              var markerJson = createJsonMarkerFromId(aiMarker.id);\n" +
         "              androidObject.sendUserMarkerAddedToAndroid(markerJson);\n" +
         "            });\n" +
-        "          }\n" +
-        "          else\n" +
+        "          } else\n" +
         "            google.maps.event.clearListeners(mapComponent,'click');\n" +
         "        };\n" +
         "\n" +
@@ -476,8 +469,7 @@ public class WebMap extends AndroidViewComponent {
         "            if (markerToShow){\n" +
         "              markerToShow.setMap(mapComponent);\n" +
         "            }\n" +
-        "          }\n" +
-        "          else {\n" +
+        "          } else {\n" +
         "            if (markerToShow) {\n" +
         "              markerToShow.setMap(null);\n" +
         "            }\n" +
@@ -489,8 +481,7 @@ public class WebMap extends AndroidViewComponent {
         "            for (var key in aiMarkers){\n" +
         "              aiMarkers[key].marker.setMap(mapComponent);\n" +
         "            }\n" +
-        "          }\n" +
-        "          else {\n" +
+        "          } else {\n" +
         "            for (var key in aiMarkers){\n" +
         "              aiMarkers[key].marker.setMap(null);\n" +
         "            }\n" +
@@ -540,17 +531,14 @@ public class WebMap extends AndroidViewComponent {
         "              var markerJson = createJsonMarkerFromId(marker.id);\n" +
         "              androidObject.sendGeolocationMarkerAddedToAndroid(markerJson,\n" +
         "                  results[0].formatted_address);\n" +
-        "            }\n" +
-        "            else {\n" +
+        "            } else {\n" +
         "              console.log('No location found!');\n" +
         "              notifyAndroid = true;\n" +
         "            }\n" +
-        "          }\n" +
-        "          else if (status === \"ZERO_RESULTS\"){\n" +
+        "          } else if (status === \"ZERO_RESULTS\"){\n" +
         "            console.log('No results found for that particular address.');\n" +
         "             notifyAndroid = true;\n" +
-        "          }\n" +
-        "          else {\n" +
+        "          } else {\n" +
         "            console.log('No results found. Status of Geolocation call: ' + status);\n" +
         "             notifyAndroid = true;\n" +
         "          }\n" +
@@ -589,7 +577,60 @@ public class WebMap extends AndroidViewComponent {
         "            marker.setTitle(title);\n" +
         "        };\n" +
         "\n" +
+        "        //var aiPolygons = {};\n" +
+        "        /**\n" +
+        "         * TODO ajcolter \n" +
+        "         * Add a polygon to the map.\n" +
+        "         * @param location {google.maps.LatLng} object specifying the position in the map\n" +
+        "         * @param infoWindowContent content to be displayed in this marker infoWindow\n" +
+        "         * @param title a title for the marker (shown on hover in browsers)\n" +
+        "         */\n" +
+        "        var addAIPolygon = function(pathList, strkColor, strkOpacity, strkWeight, fllColor, fllOpacity){\n" +
+        "          var newAiPolygon, polygon;\n" +
+        "              polygon = new google.maps.Polygon({\n" +
+        "                paths: pathList,\n" +
+        "                strokeColor: strkColor,\n" +
+        "                strokeOpacity: strkOpacity,\n" +
+        "                strokeWeight: strkWeight,\n" +
+        "                fillColor: fllColor,\n" +
+        "                fillOpacity: fllOpacity\n" +
+        "              });\n" +
+        "\n" +
+        "              // newAiPolygon = new AIMarker(marker);\n" +
+        "              // var theId = newAiMarker.id;\n" +
+        "              // google.maps.event.addListener(marker, 'click', markerClicked(theId));\n" +
+        "              // google.maps.event.addListener(marker, 'dblclick', markerClicked(theId, true));\n" +
+        "              // aiMarkers[marker.getPosition().toString()] = newAiMarker;\n" +
+        "              polygon.setMap(mapComponent);\n" +
+        "\n" +
+        "              var polygonJson = createJsonPolygon(polygon);\n" +
+        "              androidObject.sendPolygonAddedToAndroid(polygonJson, results[0].formatted_address);\n" +
+        "\n" +
+        "          // } else {\n" +
+        "          //   console.log('Calling Error handler on Android side');\n" +
+        "          //   androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);\n" +
+        "          // }\n" +
+        "          return polygon;\n" +
+        "          // return addAIPolygon;\n" +
+        "        };\n" +
+        "\n" +
+        "        function createJsonPolygon(polygon){\n" +
+        "          var currentPolygon = polygon;\n" +
+        "          var polygonObject = {\n" +
+        "            paths: currentPolygon.getPaths(),\n" +
+        "            strokeColor: currentPolygon.strokeColor,\n" +
+        "            strokeOpacity: currentPolygon.strokeOpacity,\n" +
+        "            strokeWeight: currentPolygon.strokeWeight,\n" +
+        "            fillColor: currentPolygon.fillColor,\n" +
+        "            fillOpacity: currentPolygon.fillOpacity\n" +
+        "          }\n" +
+        "          var polygonJson = JSON.stringify(polygonObject);\n" +
+        "\n" +
+        "          return polygonJson;\n" +
+        "        };\n" +
+        "\n" +
         "        //API for the mapMarkers object\n" +
+        "        //MUST ADD FUNCTION HANDLES HERE\n" +
         "        return {\n" +
         "          addMarkersFromList: addMarkersFromList,\n" +
         "          addListenersForMarkers: addListenersForMarkers,\n" +
@@ -606,7 +647,8 @@ public class WebMap extends AndroidViewComponent {
         "          locationFromLatLngCoords: locationFromLatLngCoords,\n" +
         "          setMarkerTitle: setMarkerTitle,\n" +
         "          addAIMarker: addAIMarker,\n" +
-        "          aiMarkers: aiMarkers\n" +
+        "          aiMarkers: aiMarkers,\n" +
+        "          addAIPolygon: addAIPolygon\n" +
         "        };\n" +
         "\n" +
         "      };\n" +
@@ -670,9 +712,9 @@ public class WebMap extends AndroidViewComponent {
         "              centerMarker.setMap(mapComponent);\n" +
         "            else\n" +
         "              centerMarker = createCenter();\n" +
-        "          }\n" +
-        "          else\n" +
+        "          } else {\n" +
         "            centerMarker.setMap(null);\n" +
+        "          }\n" +
         "\n" +
         "          showingCenter = show;\n" +
         "        };\n" +
@@ -680,8 +722,9 @@ public class WebMap extends AndroidViewComponent {
         "        var setCenter = function(location){\n" +
         "          if (location instanceof google.maps.LatLng){\n" +
         "            mapComponent.setCenter(location);\n" +
+        "          } else {\n" +
+        "            mapComponent.setCenter(markerFunctions.locationFromTextCoords(location));\n" +
         "          }\n" +
-        "          else mapComponent.setCenter(markerFunctions.locationFromTextCoords(location));\n" +
         "\n" +
         "          centerMarker = createCenter();\n" +
         "          showCenter(showingCenter);\n" +
@@ -693,9 +736,9 @@ public class WebMap extends AndroidViewComponent {
         "        var setZoom = function(zoom) {\n" +
         "          if (zoom >= 0 && zoom <= 19){\n" +
         "            mapComponent.setZoom(zoom);\n" +
-        "          }\n" +
-        "          else // Exception handling is also done on Android side\n" +
+        "          } else { // Exception handling is also done on Android side\n" +
         "            console.log('Zoom value ' + zoom + ' is not in the valid range 0-19');\n" +
+        "          }\n" +
         "        };\n" +
         "\n" +
         "        var getZoom = function() { return mapComponent.zoom; };\n" +
@@ -711,7 +754,7 @@ public class WebMap extends AndroidViewComponent {
         "          getZoom: getZoom\n" +
         "        }\n" +
         "      //TODO (jos) Magic numbers: the center of the map will come from Android\n" +
-        "      }(" + latLng + ", true, 6); //Auto initialize the thisMap object\n" +
+        "      }(43.473847, -8.169154, true, 6); //Auto initialize the thisMap object\n" +
         "\n" +
         "      /**\n" +
         "       * An object to hold functions that communicate directly to Android through the JS interface.\n" +
@@ -784,6 +827,11 @@ public class WebMap extends AndroidViewComponent {
         "            AppInventorMap.geolocationMarkerAdded(markerJson, formattedAddress);\n" +
         "        }\n" +
         "\n" +
+        "        sendPolygonAddedToAndroid: function(polygonJson) {\n" +
+        "          if (typeof AppInventorMap !== 'undefined')\n" +
+        "            AppInventorMap.polygonAdded(polygonJson);\n" +
+        "        }\n" +
+        "\n" +
         "      };\n" +
         "\n" +
         "      google.maps.event.addDomListener(window, 'load', thisMap.initialize);\n" +
@@ -806,6 +854,7 @@ public class WebMap extends AndroidViewComponent {
    */
   @SimpleFunction(description = "Specifies whether users will be able to add markers by clicking " +
       "on the map. True will make the map listen for clicks. False will unbind the listener.")
+  //TODO (ajcolter) is there a better name that could be used?
   public void AllowUserMarkers(boolean allowUserMarkers) {
     webview.loadUrl("javascript:thisMap.getMarkerFunctions().addListenersForMarkers(" +
         allowUserMarkers + ")");
@@ -892,6 +941,67 @@ public class WebMap extends AndroidViewComponent {
     return YailList.makeList(new ArrayList()); // Return an empty list if we cannot create a marker
   }
 
+  @SimpleFunction(description = "Creates and returns a Polygon. The paths object expects a set of latitude-longitude " +
+      "pairs. The range for latitude is [-90, 90], and the range for longitude is [-180, 180]. The stroke color is " +
+      "the desired for the stroke between vertices. The stroke opacity is the opacity of the line between vertices. " +
+      "The stroke weight is the thickness of the line between vertices. The fill color is the color that will be used" +
+      " to fill the polygon. The fill opacity is the opacity of the fill in the polygon.")
+  public YailList Polygon(YailList paths, int strokeColor, long strokeOpacity, long strokeWeight, int fillColor,
+                          long fillOpacity) {
+
+    ArrayList<String> values = new ArrayList<String>();
+//    ArrayList<String> pathsCopy = new ArrayList<String>();
+    //comma separate all of the values
+//    for (int i = 0; i< paths.length(); i++) {
+//      pathsCopy.add(paths.getString(i) + ",");
+//    }
+//    Log.i("aubrey", pathsCopy.toString());
+//    values.add(YailList.makeList(pathsCopy) + "");
+    values.add(paths + "");
+    values.add(strokeColor + "");
+    values.add(strokeOpacity + "");
+    values.add(strokeWeight + "");
+    values.add(strokeWeight + "");
+    values.add(fillColor + "");
+    values.add(fillOpacity + "");
+    Log.i("aubrey values", values.toString());
+    return YailList.makeList(values);
+  }
+
+  @SimpleFunction(description = "Adds a polygon to the map.")
+  public void AddPolygonToMap(YailList polygon) {
+    Log.i("aubrey polygon", polygon.toString());
+    Log.i("aubrey object0", polygon.getObject(0).toString());
+    String[] polygonData = polygon.toStringArray();
+    polygon.getString(0);
+
+    String pathval = new String();
+//    String pathsString = polygon.getObject(0).toString();
+
+//    String[] pathsArray = pathsString.split("\\.");
+    YailList pathlist = ElementsUtil.elementsFromString(polygon.getObject(0).toString());
+//    pathlist.getObject();
+    String[] s = pathlist.toStringArray();
+    Log.i("aubrey pathlist", pathlist.toString());
+    for (int i = 0; i < s.length; i++) {
+      Log.i("aubrey " + i, s[i]);
+//      pathlist.getObject(i+1).toString().split("\\s+");
+//      pathval += "thisMap.getMarkerFunctions().locationFromLatLngCoords" + pathlist.getString(i) + ", " +
+//          pathlist.getString(i+1) + ",";
+    }
+    Log.i("aubrey pathval", pathval);
+//    Log.i("aubrey patharray", pathsArray.toString());
+//    Log.i("aubrey pathval", pathval);
+//    String javaScriptCommand = "javascript:thisMap.getMarkerFunctions().addAIPolygon([" +
+//        "thisMap.getMarkerFunctions().locationFromLatLngCoords(25.774252, -80.190262)," +
+//        "thisMap.getMarkerFunctions().locationFromLatLngCoords(18.466465, -66.118292)," +
+//        "thisMap.getMarkerFunctions().locationFromLatLngCoords(32.321384, -64.75737)," + "'], '" +
+//        polygonData[1] + "', '" + polygonData[2] + "', '" + polygonData[3] + "', '" + polygonData[4] + "', '" +
+//        polygonData[5] + "', '" + polygonData[6] + "')";
+
+//    webview.loadUrl(javaScriptCommand);
+  }
+
   @SimpleFunction(description = "Shows a particular marker on the map by its id.")
   public void ShowMarker(YailList marker, boolean show) {
     String markerId = idForMarker(marker);
@@ -910,7 +1020,7 @@ public class WebMap extends AndroidViewComponent {
     webview.loadUrl("javascript:thisMap.getMarkerFunctions().panToMarker('" + markerId+ "')");
   }
 
-  @SimpleFunction(description = "A new marker with all properties unchanged but for the title of" +
+  @SimpleFunction(description = "A new marker with all properties unchanged except for the title of" +
       " the particular marker passed as a parameter. This title could be used as" +
       " a more human readable id to show and select markers in a ListView or ListPicker.")
   public YailList SetMarkerTitle(YailList marker, String title) {
@@ -944,27 +1054,27 @@ public class WebMap extends AndroidViewComponent {
     return Long.valueOf(marker.getString(0)).longValue();
   }
 
-  @SimpleFunction(description = "Get the Longitude content of a particular marker.")
+  @SimpleFunction(description = "Get the Longitude of a particular marker.")
   public long GetMarkerLongitude(YailList marker) {
     return Long.valueOf(marker.getString(1)).longValue();
   }
 
-  @SimpleFunction(description = "This function requests a list of lists that contains all the " +
-      "markers currently existing on the map. These markers that can be hidden or visible, " +
-      "could have been added by the AI developer or directly by the end user. The list of lists " +
-      "can be persisted with an additional component such as TinyDB. This function triggers the " +
+  @SimpleFunction(description = "This function requests a list of lists that contains all of the " +
+      "markers currently existing on the map. These markers can be hidden or visible, and " +
+      "could have been added by the AI developer or directly by the end user. This list of lists " +
+      "can be persisted with an additional component, such as TinyDB. This function triggers the " +
       "event MarkersFromMapReceived when the list is received. Several lists of markers could be " +
       "stored in the Screen and sent to the map with the block AddMarkersFromList.")
-  public void RequestListOfMarkersFromMap() {
+  public void RequestListOfMarkersFromMap() { //may make more sense to name this GetListOfMarkers
     webview.loadUrl("javascript:thisMap.getMarkerFunctions().storeMarkers()");
   }
 
   @SimpleFunction(description = "Visualizes a list of lists of markers in the map. This block " +
-      "could be used in combination with RequestListOfMarkersFromMap to manage different lists of" +
-      " markers within the same map. Note that the format must be a list of lists, " +
-      "and those lists should contain 4 elements (id coords title content).")
+      "could be used in combination with RequestListOfMarkersFromMap to manage different lists of " +
+      "markers within the same map. Note that the format must be a list of lists, " +
+      "and those lists should contain 4 elements (id, coordinates, title, content).")
   public void AddMarkersFromList(YailList list) {
-    //TODO (jos) make sure it is a List of Lists and convert it to JSON
+    //TODO (ajcolter) make sure it is a List of Lists and convert it to JSON
     String markersJSON = createStringifiedJSONFromYailList(list);
     webview.loadUrl("javascript:thisMap.getMarkerFunctions().addMarkersFromList('" + markersJSON +
         "')");
@@ -1071,11 +1181,32 @@ public class WebMap extends AndroidViewComponent {
       values.add(object.getString("info"));
       marker = YailList.makeList(values);
     } catch (JSONException e) {
-      //TODO (jos) do something about this! Create an ErrorMessage for this
+      //TODO (ajcolter) do something about this! Create an ErrorMessage for this
       e.printStackTrace();
-      Log.d(TAG, "Problem parsing the JSON that comes from the JavaScript Click handler");
+      Log.d(TAG, "Problem parsing the JSON that came from the JavaScript Click handler");
     }
     return marker;
+  }
+
+  private YailList createPolygonFromStringifiedJson(String jsonPolygon){
+    YailList polygon = YailList.makeList(new ArrayList());
+    try {
+      JSONObject object = new JSONObject(jsonPolygon);
+
+      ArrayList<String> values = new ArrayList<String>();
+      values.add(object.getString("paths"));
+      values.add(object.getString("strokeColor"));
+      values.add(object.getString("strokeOpacity"));
+      values.add(object.getString("strokeWeight"));
+      values.add(object.getString("fillColor"));
+      values.add(object.getString("fillOpacity"));
+      polygon = YailList.makeList(values);
+    } catch (JSONException e) {
+      //TODO (ajcolter) do something about this! Create an ErrorMessage for this
+      e.printStackTrace();
+      Log.d(TAG, "Problem parsing the JSON that came from the JavaScript Click handler");
+    }
+    return polygon;
   }
 
   /**
@@ -1086,6 +1217,7 @@ public class WebMap extends AndroidViewComponent {
   @SimpleEvent(description = "Event triggered by a marker being doubled clicked on the map. NOTE " +
       "that a MarkerClicked event will always be triggered at the same time that a marker is " +
       "being double clicked.")
+  //TODO (ajcolter) make a work around for this. It's silly to have a clicked and a double clicked event triggered at the same time.
   public void MarkerDoubleClicked(final String marker) {
     YailList markerYail = createMarkerFromStringifiedJson(marker);
     EventDispatcher.dispatchEvent(this, "MarkerDoubleClicked", markerYail);
@@ -1099,14 +1231,14 @@ public class WebMap extends AndroidViewComponent {
   }
 
   @SimpleEvent(description = "Event triggered after the map has finished loading and is ready to " +
-      "receive instructions. Anything done before the map is fully loaded might not take any " +
+      "receive instructions. Anything done before the map is fully loaded might not have any " +
       "effect.")
   public void MapIsReady() {
     EventDispatcher.dispatchEvent(this, "MapIsReady");
   }
 
   @SimpleEvent(description = "A user has added a marker by clicking on the map. This event will " +
-      "only triggers if users are allowed to add markers by using the block AllowUserMarkers. " +
+      "trigger only if users are allowed to add markers by using the block AllowUserMarkers. " +
       "The marker is returned so that actions can be applied to that particular marker.")
   public void UserMarkerAdded(final String marker) {
     YailList markerYail = createMarkerFromStringifiedJson(marker);
@@ -1114,10 +1246,17 @@ public class WebMap extends AndroidViewComponent {
   }
 
   @SimpleEvent(description = "A marker has been added to the map by using the Geolocate block. " +
-      "the marker is returned so that actions can be applied to that particular marker.")
+      "The marker is returned so that actions can be applied to that particular marker.")
   public void GeolocationMarkerAdded(final String marker, final String formattedAddress) {
     YailList markerYail = createMarkerFromStringifiedJson(marker);
     EventDispatcher.dispatchEvent(this, "GeolocationMarkerAdded", markerYail, formattedAddress);
+  }
+
+  @SimpleEvent(description = "A polygon has been added to the map by using the Polygon block. " +
+      "The polygon is returned so that actions can be applied to that particular polygon.")
+  public void PolygonAdded(final String polygon) {
+    YailList polygonYail = createPolygonFromStringifiedJson(polygon);
+    EventDispatcher.dispatchEvent(this, "PolygonAdded", polygonYail);
   }
 
   /**
@@ -1144,7 +1283,7 @@ public class WebMap extends AndroidViewComponent {
 
     @JavascriptInterface
     public void handleMarker(final String jsonMarker) {
-      Log.d(TAG, "we have a marker clicked: " + jsonMarker);
+      Log.d(TAG, "Marker clicked: " + jsonMarker);
       webViewForm.runOnUiThread(new Runnable() {
         @Override
         public void run() {
@@ -1155,7 +1294,7 @@ public class WebMap extends AndroidViewComponent {
 
     @JavascriptInterface
     public void handleDoubleMarker(final String jsonMarker) {
-      Log.d(TAG, "we have a marker DOUBLED clicked: " + jsonMarker);
+      Log.d(TAG, "Marker DOUBLED clicked: " + jsonMarker);
       webViewForm.runOnUiThread(new Runnable() {
         @Override
         public void run() {
@@ -1199,7 +1338,7 @@ public class WebMap extends AndroidViewComponent {
 
     @JavascriptInterface
     public void mapIsReady() {
-      Log.d(TAG, "MAP IS READY IS BEING CALLED!!!!!!!!!!!!!!");
+      Log.d(TAG, "MAP IS READY IS BEING CALLED!");
       webViewForm.runOnUiThread(new Runnable() {
         @Override
         public void run() {
