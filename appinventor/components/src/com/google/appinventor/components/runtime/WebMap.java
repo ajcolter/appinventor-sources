@@ -1019,13 +1019,13 @@ public class WebMap extends AndroidViewComponent {
   }
 
   @SimpleFunction(description = "Get the Latitude of a particular marker.")
-  public long GetMarkerLatitude(YailList marker) {
-    return Long.valueOf(marker.getString(0)).longValue();
+  public double GetMarkerLatitude(YailList marker) {
+    return Double.valueOf(marker.getString(0)).doubleValue();
   }
 
   @SimpleFunction(description = "Get the Longitude of a particular marker.")
-  public long GetMarkerLongitude(YailList marker) {
-    return Long.valueOf(marker.getString(1)).longValue();
+  public double GetMarkerLongitude(YailList marker) {
+    return Double.valueOf(marker.getString(1)).doubleValue();
   }
 
   @SimpleFunction(description = "This function requests a list of lists that contains all of the " +
