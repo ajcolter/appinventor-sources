@@ -346,58 +346,6 @@
             marker.setTitle(title);
         };
 
-        //var aiPolygons = {};
-        /**
-         * TODO ajcolter 
-         * Add a polygon to the map.
-         * @param location {google.maps.LatLng} object specifying the position in the map
-         * @param infoWindowContent content to be displayed in this marker infoWindow
-         * @param title a title for the marker (shown on hover in browsers)
-         */
-        var addAIPolygon = function(pathList, strkColor, strkOpacity, strkWeight, fllColor, fllOpacity){
-          var newAiPolygon, polygon;
-          polygon = new google.maps.Polygon({
-            paths: pathList,
-            strokeColor: strkColor,
-            strokeOpacity: strkOpacity,
-            strokeWeight: strkWeight,
-            fillColor: fllColor,
-            fillOpacity: fllOpacity
-          });
-
-          // newAiPolygon = new AIMarker(marker);
-          // var theId = newAiMarker.id;
-          // google.maps.event.addListener(marker, 'click', markerClicked(theId));
-          // google.maps.event.addListener(marker, 'dblclick', markerClicked(theId, true));
-          // aiMarkers[marker.getPosition().toString()] = newAiMarker;
-          polygon.setMap(mapComponent);
-
-          var polygonJson = createJsonPolygon(polygon);
-          androidObject.sendPolygonAddedToAndroid(polygonJson, results[0].formatted_address);
-
-          // } else {
-          //   console.log('Calling Error handler on Android side');
-          //   androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);
-          // }
-          return polygon;
-          // return addAIPolygon;
-        };
-
-        function createJsonPolygon(polygon){
-          var currentPolygon = polygon;
-          var polygonObject = {
-            paths: currentPolygon.getPaths(),
-            strokeColor: currentPolygon.strokeColor,
-            strokeOpacity: currentPolygon.strokeOpacity,
-            strokeWeight: currentPolygon.strokeWeight,
-            fillColor: currentPolygon.fillColor,
-            fillOpacity: currentPolygon.fillOpacity
-          }
-          var polygonJson = JSON.stringify(polygonObject);
-
-          return polygonJson;
-        };
-
         //API for the mapMarkers object
         //MUST ADD FUNCTION HANDLES HERE
         return {
@@ -417,7 +365,6 @@
           setMarkerTitle: setMarkerTitle,
           addAIMarker: addAIMarker,
           aiMarkers: aiMarkers,
-          addAIPolygon: addAIPolygon
         };
 
       };
@@ -595,11 +542,6 @@
           if (typeof AppInventorMap !== 'undefined')
             AppInventorMap.geolocationMarkerAdded(markerJson, formattedAddress);
         },
-
-        sendPolygonAddedToAndroid: function(polygonJson) {
-          if (typeof AppInventorMap !== 'undefined')
-            AppInventorMap.polygonAdded(polygonJson);
-        }
 
       };
 
