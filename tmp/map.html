@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>App Inventor - Map Component</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script>
+      /**
+       * This map script is an abstraction of a number of functions from the Google maps
+       * JavaScript API to be used within a customized WebView as an App Inventor Component.
+       *
+       * It contains two main objects: thisMap and mapMarkers.
+       * thisMap initializes the map and makes use of mapMarkers, which simply encapsulates all
+       * functions related to markers placed in the map. It is possible to create other utility
+       * objects with other functionality in the SDK such as drawing, layers, or services.
+       */
+
+      /**
+       * This function returns an object with certain methods exposed as its API. The functionality
+       * of this object is related to management of markers in the map.
+       * @returns an Object with methods related to Marker management.
+       * @param mapComponent the map to associate the markers with.
+       */
+      var mapMarkers = function(mapComponent) {
+
+        if (!mapComponent) throw new Error('No map available');
+
+        function AIMarker(marker){
+          if (marker instanceof google.maps.Marker){
+            this.marker = marker;
+            this.id = marker.getPosition().toString(); //Use position as unique id
+          } else {
+            console.log('Calling Error handler on Android side - Invalid Marker');
+            androidObject.dispatchErrorToAndroid(androidObject.ERROR_INVALID_MARKER);
+          }
+        }
+
+        AIMarker.prototype.equals = function(otherMarker){
+          if (otherMarker == null) return false;
+          if (otherMarker instanceof AIMarker){
+            //Equality is based on position - two markers on the same position are the same marker
+            return this.marker.getPosition().toString() ===
+              otherMarker.marker.getPosition().toString();
+          }
+          return false;
+
+        }
+
+        var aiMarkers = {};
+
+        /**
+         * Add a marker, with additional information, to the map.
+         * @param location {google.maps.LatLng} object specifying the position in the map
+         * @param infoWindowContent content to be displayed in this marker infoWindow
+         * @param title a title for the marker (shown on hover in browsers)
+         */
+        var addAIMarker = function(location, title, infoWindowContent){
+          var newAiMarker, marker;
+          if (location instanceof google.maps.LatLng){
+            newAiMarker = aiMarkers[location.toString()];
+            if (newAiMarker) { //If it exists, there's no need to create it
+              marker = newAiMarker.marker;
+              // We override values even if they are not different - it's easier.
+              marker.title = title;
+              if (infoWindowContent && marker.info){
+                marker.info.setContent(infoWindowContent);
+              }
+            } else {
+              marker = new google.maps.Marker({
+                position: location,
+                title: title || '',
+                map: mapComponent
+              });
+
+              newAiMarker = new AIMarker(marker);
+              var theId = newAiMarker.id;
+              google.maps.event.addListener(marker, 'click', markerClicked(theId));
+              google.maps.event.addListener(marker, 'dblclick', markerClicked(theId, true));
+              aiMarkers[marker.getPosition().toString()] = newAiMarker;
+
+              if (infoWindowContent) {
+                createInfoWindow(theId, infoWindowContent);
+              }
+            }
+          } else {
+            console.log('Calling Error handler on Android side');
+            androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);
+          }
+
+          return newAiMarker;
+        };
+
+        // Closure needed to associate each markerId with its click handler function
+        function markerClicked(markerId, doubleClick) {
+          return function(){
+            handleMarkerById(markerId, doubleClick);
+          }
+        }
+
+        function handleMarkerById(markerId, doubleClick) {
+          var markerJson = createJsonMarkerFromId(markerId);
+          if (doubleClick)
+            androidObject.sendDoubleMarkerToAndroid(markerJson);
+          else
+            androidObject.sendMarkerToAndroid(markerJson);
+        }
+
+        function createJsonMarkerFromId(markerId){
+          var currentAiMarker = aiMarkers[markerId];
+          var markerObject = {
+            lat: currentAiMarker.marker.getPosition().lat(),
+            lng: currentAiMarker.marker.getPosition().lng(),
+            title: currentAiMarker.marker.title || '',
+            info: (currentAiMarker.marker.info && currentAiMarker.marker.info.content) ?
+              currentAiMarker.marker.info.content : ''
+          }
+          var markerJson = JSON.stringify(markerObject);
+
+          return markerJson;
+        }
+
+        var panToMarker = function(markerId) {
+          var markerToPanTo = aiMarkers[markerId].marker;
+          if (markerToPanTo)
+            mapComponent.panTo(markerToPanTo.getPosition());
+        };
+
+        /**
+         * Decodes the JSON input and generates and displays markers for each of the objects.
+         * Sample data:
+         * "[
+         *     {"lat":48.856614,"lng":2.3522219000000177,"title":"","content":""},
+         *     {"lat":48,"lng":3,"title":"near paris","content":"near Paris content"}
+         *  ]"
+         * @param listOfMarkers a JSON representation of the markers to be displayed
+         */
+        var addMarkersFromList = function(listOfMarkers) {
+          var allMarkers = [];
+          try {
+            allMarkers = JSON.parse(listOfMarkers);
+          } catch(parseError) {
+            console.log('List of Markers is not valid JSON. Notifying Android side.');
+            androidObject.dispatchErrorToAndroid(androidObject.ERROR_PARSING_MARKERS_LIST)
+          }
+
+          function decodeMarker(markerObject){
+            var markerData = [];
+            var lat, lng;
+
+            if (markerObject.lat)
+              lat = markerObject.lat;
+
+            if (markerObject.lng)
+              lng = markerObject.lng;
+
+            if (lat && lng)
+              markerData[0] = locationFromLatLngCoords(lat, lng);
+
+            if (markerObject.title)
+              markerData[1] = markerObject.title;
+
+            if (markerObject.content)
+              markerData[2] = markerObject.content;
+
+            // Location has to be available(other fields are optional).
+            if (markerData[0] instanceof google.maps.LatLng)
+              return markerData;
+            else //TODO (jos) trigger user feedback or not?
+              return null;
+          }
+
+          allMarkers.forEach(function(markerObject) {
+            // Try to decode each marker and even if some fail, still add the others.
+            var markerData = decodeMarker(markerObject);
+            if (markerData)
+              addAIMarker(markerData[0], markerData[1], markerData[2]);
+          });
+        }
+        var locationFromLatLngCoords = function(lat, lng){
+          var errorParsing = false;
+          //DO WE NEED TO DO THIS? the LatLng will wrap the coordinates. 
+          if (isNaN(lat) || isNaN(lng)) errorParsing = true;
+          if (lat < -90 || lat > 90) errorParsing = true;
+          if (lng < -180 || lng > 180) errorParsing = true;
+
+          if (errorParsing) {
+            androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);
+            return null;
+          } else {
+            return new google.maps.LatLng(lat, lng);
+          }
+
+        };
+
+        /**
+         * Generates a LatLng map object from coordinates passed in as a string. Valid ranges are:
+         * Lat [-90, 90], and Lng [-180, 180].
+         * @param locationText a string in the format 'float, float'
+         * @returns {google.maps.LatLng} a LatLng object or null if the location is not in the
+         * right format.
+         */
+        var locationFromTextCoords = function(locationText) {
+          var lat, lng;
+
+          var locationSplit = locationText.split(',');
+          if (locationSplit.length === 2){
+            lat = parseFloat(locationSplit[0]);
+            lng = parseFloat(locationSplit[1]);
+            return locationFromLatLngCoords(lat, lng);
+          } else {
+            androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);
+            return null;
+          }
+        };
+
+        var addListenersForMarkers = function (add) {
+          if (add){
+            google.maps.event.addListener(mapComponent, 'click', function(event) {
+              var aiMarker = addAIMarker(event.latLng);
+              var markerJson = createJsonMarkerFromId(aiMarker.id);
+              androidObject.sendUserMarkerAddedToAndroid(markerJson);
+            });
+          } else
+            google.maps.event.clearListeners(mapComponent,'click');
+        };
+
+        var showMarker = function(markerId, show) {
+          var markerToShow = aiMarkers[markerId].marker;
+          if (show) {
+            if (markerToShow){
+              markerToShow.setMap(mapComponent);
+            }
+          } else {
+            if (markerToShow) {
+              markerToShow.setMap(null);
+            }
+          }
+        };
+
+        var showMarkers = function (show){
+          if (show) {
+            for (var key in aiMarkers){
+              aiMarkers[key].marker.setMap(mapComponent);
+            }
+          } else {
+            for (var key in aiMarkers){
+              aiMarkers[key].marker.setMap(null);
+            }
+          }
+        };
+
+        var deleteMarkers = function (){
+          showMarkers(false);
+          aiMarkers = {};
+        };
+
+        var storeMarkers = function () {
+          var allMarkers = [];
+          for (var key in aiMarkers){
+            var marker = aiMarkers[key].marker;
+
+            var jsMarker = {};
+            jsMarker.lat = marker.getPosition().lat();
+            jsMarker.lng = marker.getPosition().lng();
+            jsMarker.title = marker.title || '';
+            if (marker.info && marker.info.content)
+              jsMarker.content = marker.info.content;
+            else
+              jsMarker.content = '';
+
+            allMarkers.push(jsMarker);
+          }
+
+          androidObject.sendListOfMarkersToAndroid(JSON.stringify(allMarkers));
+
+          return allMarkers;
+        };
+
+        //Geolocation service
+        var geolocate = function (address){
+          var geocoder = new google.maps.Geocoder();
+          geocoder.geocode({address: address}, geolocationResults)
+        };
+
+        function geolocationResults(results, status){
+          var notifyAndroid = false;
+          if (status === 'OK') {
+            var firstLocationFound = results[0].geometry.location;
+            if (firstLocationFound){
+              console.log(firstLocationFound);
+              var marker = addAIMarker(firstLocationFound);
+              var markerJson = createJsonMarkerFromId(marker.id);
+              androidObject.sendGeolocationMarkerAddedToAndroid(markerJson,
+                                                                results[0].formatted_address);
+            } else {
+              console.log('No location found!');
+              notifyAndroid = true;
+            }
+          } else if (status === "ZERO_RESULTS"){
+            console.log('No results found for that particular address.');
+            notifyAndroid = true;
+          } else {
+            console.log('No results found. Status of Geolocation call: ' + status);
+            notifyAndroid = true;
+          }
+
+          if (notifyAndroid) {
+            console.log('Notifying the Android side: No Results from Geolocation.')
+            androidObject.dispatchErrorToAndroid(androidObject.ERROR_NO_GEOLOCATION_RESULTS);
+          }
+        };
+
+        // InfoWindow functions
+        var createInfoWindow = function(markerId, content) {
+          var infoWindow = new google.maps.InfoWindow({
+            content: content
+          });
+          var marker = aiMarkers[markerId].marker;
+          if (marker)
+            marker.info = infoWindow;
+        };
+
+        var openInfoWindow = function(markerId){
+          var marker = aiMarkers[markerId].marker;
+          if (marker && marker.info)
+            marker.info.open(mapComponent, marker);
+        };
+
+        var closeInfoWindow = function(markerId){
+          var marker = aiMarkers[markerId].marker;
+          if (marker && marker.info)
+            marker.info.close();
+        };
+
+        var setMarkerTitle = function(markerId, title) {
+          var marker = aiMarkers[markerId].marker;
+          if (marker)
+            marker.setTitle(title);
+        };
+
+        //var aiPolygons = {};
+        /**
+         * TODO ajcolter 
+         * Add a polygon to the map.
+         * @param location {google.maps.LatLng} object specifying the position in the map
+         * @param infoWindowContent content to be displayed in this marker infoWindow
+         * @param title a title for the marker (shown on hover in browsers)
+         */
+        var addAIPolygon = function(pathList, strkColor, strkOpacity, strkWeight, fllColor, fllOpacity){
+          var newAiPolygon, polygon;
+          polygon = new google.maps.Polygon({
+            paths: pathList,
+            strokeColor: strkColor,
+            strokeOpacity: strkOpacity,
+            strokeWeight: strkWeight,
+            fillColor: fllColor,
+            fillOpacity: fllOpacity
+          });
+
+          // newAiPolygon = new AIMarker(marker);
+          // var theId = newAiMarker.id;
+          // google.maps.event.addListener(marker, 'click', markerClicked(theId));
+          // google.maps.event.addListener(marker, 'dblclick', markerClicked(theId, true));
+          // aiMarkers[marker.getPosition().toString()] = newAiMarker;
+          polygon.setMap(mapComponent);
+
+          var polygonJson = createJsonPolygon(polygon);
+          androidObject.sendPolygonAddedToAndroid(polygonJson, results[0].formatted_address);
+
+          // } else {
+          //   console.log('Calling Error handler on Android side');
+          //   androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);
+          // }
+          return polygon;
+          // return addAIPolygon;
+        };
+
+        function createJsonPolygon(polygon){
+          var currentPolygon = polygon;
+          var polygonObject = {
+            paths: currentPolygon.getPaths(),
+            strokeColor: currentPolygon.strokeColor,
+            strokeOpacity: currentPolygon.strokeOpacity,
+            strokeWeight: currentPolygon.strokeWeight,
+            fillColor: currentPolygon.fillColor,
+            fillOpacity: currentPolygon.fillOpacity
+          }
+          var polygonJson = JSON.stringify(polygonObject);
+
+          return polygonJson;
+        };
+
+        //API for the mapMarkers object
+        //MUST ADD FUNCTION HANDLES HERE
+        return {
+          addMarkersFromList: addMarkersFromList,
+          addListenersForMarkers: addListenersForMarkers,
+          showMarker: showMarker,
+          showMarkers: showMarkers,
+          deleteMarkers: deleteMarkers,
+          storeMarkers: storeMarkers,
+          geolocate: geolocate,
+          panToMarker: panToMarker,
+          createInfoWindow: createInfoWindow,
+          openInfoWindow: openInfoWindow,
+          closeInfoWindow: closeInfoWindow,
+          locationFromTextCoords: locationFromTextCoords,
+          locationFromLatLngCoords: locationFromLatLngCoords,
+          setMarkerTitle: setMarkerTitle,
+          addAIMarker: addAIMarker,
+          aiMarkers: aiMarkers,
+          addAIPolygon: addAIPolygon
+        };
+
+      };
+
+
+      /**
+       * Main function for this script. Initializes the map and all the related functionality.
+       *
+       */
+      var thisMap = function(centerLat, centerLng, showCenter, initialZoom){
+
+        var map;
+        var centerMarker;
+        var markerFunctions;
+        var zoom = initialZoom || 6;
+        var showingCenter = showCenter || true;
+        function initialize() {
+          var mapOptions = {
+            zoom: zoom,
+            center: new google.maps.LatLng(centerLat, centerLng),
+            disableDoubleClickZoom: true
+          };
+          mapComponent = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+          // Listening for the first 'idle' event to tell Android that the map is ready
+          google.maps.event.addListenerOnce(mapComponent, 'idle', function(){
+            console.log('Triggering mapIsReady on Android side.');
+            androidObject.mapIsReadyToAndroid();
+          });
+
+          centerMarker = createCenter();
+          showCenter(showingCenter);
+
+          //Initialize marker functions object
+          markerFunctions = mapMarkers(mapComponent);
+
+        }
+
+        var createCenter = function(){
+          if (centerMarker) centerMarker.setMap(null); // Delete any existing center first.
+          var newCenter;
+          if (mapComponent && mapComponent.getCenter()){
+            newCenter = new google.maps.Marker({
+              position: mapComponent.getCenter(),
+              map: mapComponent,
+              title: 'Map Center',
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 6
+              }
+            });
+          }
+          return newCenter;
+        };
+
+        // Special case of showing a marker only for the center. Might be possible to abstract in
+        // markerFunctions, but leaving it here for now (jos).
+        var showCenter = function(show){
+          if (show){
+            if (centerMarker)
+              centerMarker.setMap(mapComponent);
+            else
+              centerMarker = createCenter();
+          } else {
+            centerMarker.setMap(null);
+          }
+
+          showingCenter = show;
+        };
+
+        var setCenter = function(location){
+          if (location instanceof google.maps.LatLng){
+            mapComponent.setCenter(location);
+          } else {
+            mapComponent.setCenter(markerFunctions.locationFromTextCoords(location));
+          }
+
+          centerMarker = createCenter();
+          showCenter(showingCenter);
+        };
+
+        var getMap = function() { return mapComponent; };
+        var getMarkerFunctions = function() { return markerFunctions; };
+
+        var setZoom = function(zoom) {
+          if (zoom >= 0 && zoom <= 19){
+            mapComponent.setZoom(zoom);
+          } else { // Exception handling is also done on Android side
+            console.log('Zoom value ' + zoom + ' is not in the valid range 0-19');
+          }
+        };
+
+        var getZoom = function() { return mapComponent.zoom; };
+
+        //API for the thisMap object: main entry object for functionality
+        return {
+          initialize: initialize,
+          showCenter: showCenter,
+          setCenter: setCenter,
+          getMap: getMap, // For Debugging (not used from the component).
+          getMarkerFunctions: getMarkerFunctions,
+          setZoom: setZoom,
+          getZoom: getZoom
+        }
+        //TODO (jos) Magic numbers: the center of the map will come from Android
+      }(43.473847, -8.169154, true, 6); //Auto initialize the thisMap object
+
+      /**
+       * An object to hold functions that communicate directly to Android through the JS interface.
+       * @type {{ERROR_ILLEGAL_COORDS_FORMAT: number, ERROR_PARSING_MARKERS_LIST: number,
+       * ERROR_NO_GEOLOCATION_RESULTS: number, dispatchErrorToAndroid: dispatchErrorToAndroid,
+       * sendMarkerToAndroid: sendMarkerToAndroid,
+       * sendDoubleMarkerToAndroid: sendDoubleMarkerToAndroid,
+       * sendListOfMarkersToAndroid: sendListOfMarkersToAndroid,
+       * mapIsReadyToAndroid: mapIsReadyToAndroid,
+       * sendUserMarkerAddedToAndroid: sendUserMarkerAddedToAndroid,
+       * sendGeolocationMarkerAddedToAndroid: sendGeolocationMarkerAddedToAndroid}}
+       */
+      var androidObject = {
+
+        // CONSTANTS FOR ERRORS, As defined on the Android side.
+        ERROR_ILLEGAL_COORDS_FORMAT: 2802,
+        ERROR_PARSING_MARKERS_LIST: 2803,
+        ERROR_INVALID_MARKER: 2804,
+        ERROR_NO_GEOLOCATION_RESULTS: 2806,
+
+        /**
+         * Function to dispatch errors to Android through the AppInventorMap interface. If this
+         * file is loaded on a browser, AppInventorMap will be undefined and we skip the
+         * dispatching.
+         * TODO (jos) think about Error handling in JS if I even want to use this file standalone.
+         * @param errorNumber number for the message to display as user feedback on the Android
+         * side. The messages are defined in ErrorMessages.java
+         */
+        dispatchErrorToAndroid: function(errorNumber) {
+          if (typeof AppInventorMap !== 'undefined')
+            AppInventorMap.dispatchError(errorNumber);
+        },
+
+        /**
+         * Function to call to the Android side after a user has clicked on a marker
+         */
+        sendMarkerToAndroid: function(jsonMarker) {
+          if (typeof AppInventorMap !== 'undefined')
+            AppInventorMap.handleMarker(jsonMarker);
+        },
+
+        sendDoubleMarkerToAndroid: function(jsonMarker) {
+          if (typeof AppInventorMap !== 'undefined')
+            AppInventorMap.handleDoubleMarker(jsonMarker);
+        },
+
+        /**
+         * Function to export all markers to the Android side for storage
+         */
+        sendListOfMarkersToAndroid: function(markers) {
+          if (typeof AppInventorMap !== 'undefined')
+            AppInventorMap.storeMarkers(markers);
+        },
+
+        /**
+         * Notify Component that the Map is ready.
+         */
+        mapIsReadyToAndroid: function() {
+          if (typeof AppInventorMap !== 'undefined')
+            AppInventorMap.mapIsReady();
+        },
+
+        sendUserMarkerAddedToAndroid: function(markerJson) {
+          if (typeof AppInventorMap !== 'undefined')
+            AppInventorMap.userMarkerAdded(markerJson);
+        },
+
+        sendGeolocationMarkerAddedToAndroid: function(markerJson, formattedAddress) {
+          if (typeof AppInventorMap !== 'undefined')
+            AppInventorMap.geolocationMarkerAdded(markerJson, formattedAddress);
+        },
+
+        sendPolygonAddedToAndroid: function(polygonJson) {
+          if (typeof AppInventorMap !== 'undefined')
+            AppInventorMap.polygonAdded(polygonJson);
+        }
+
+      };
+
+      google.maps.event.addDomListener(window, 'load', thisMap.initialize);
+
+    </script>
+  </head>
+  <body>
+    <div id="map-canvas"></div>
+  </body>
+</html>

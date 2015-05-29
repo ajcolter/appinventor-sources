@@ -60,7 +60,7 @@ import java.util.List;
 @UsesPermissions(permissionNames = "android.permission.INTERNET")
 public class WebMap extends AndroidViewComponent {
 
-  public static final String TAG = "WEBMAP";
+  public static final String LOG_TAG = "WEBMAP";
   public static final String INITIAL_LOCATION = "43.473847, -8.169154"; // Perlío, Spain.
   private final WebView webview;
   private String googleMapsKey = "";
@@ -94,7 +94,7 @@ public class WebMap extends AndroidViewComponent {
     //TODO (jos) will this crash in lower level phones?
     webview.setWebChromeClient(new WebChromeClient() {
       public boolean onConsoleMessage(ConsoleMessage cm) {
-        Log.d("WEBMAP", cm.message() + " -- From line "
+        Log.d(LOG_TAG, cm.message() + " -- From line "
             + cm.lineNumber() + " of "
             + cm.sourceId() );
         return true;
@@ -169,13 +169,15 @@ public class WebMap extends AndroidViewComponent {
    * @return the input string if it's in the correct format or INTIAL_LOCATION otherwise.
    */
   private String decodeLatLng(String latLng) {
+    Log.d(LOG_TAG, "DecodeLatLng called: " + latLng);
     if (latLng.equals("")){
-      Log.d(TAG, "No initial Location set; defaulting to Perlío, Spain.");
+      Log.d(LOG_TAG, "No initial Location set; defaulting to Perlío, Spain.");
       return INITIAL_LOCATION;
     }
     else{
       boolean errorParsing = false;
       String [] locationSplit = latLng.split(",");
+      Log.d(LOG_TAG, "locationSplit.length = " + locationSplit.length);
       if (locationSplit.length == 2){
         try {
           float lat = Float.parseFloat(locationSplit[0]);
@@ -196,7 +198,7 @@ public class WebMap extends AndroidViewComponent {
         handler.postDelayed(new Runnable(){
           @Override
           public void run() {
-            Log.d(TAG, "In the Handler Thread dispatching the parsing error;");
+            Log.d(LOG_TAG, "In the Handler Thread dispatching the parsing error;");
             form.dispatchErrorOccurredEvent(form, "InitialLocationLongLat",
                 ErrorMessages.ERROR_ILLEGAL_INITIAL_CORDS_FORMAT);
           }
@@ -843,7 +845,8 @@ public class WebMap extends AndroidViewComponent {
         "  </body>\n" +
         "</html>\n";
 
-    webview.loadDataWithBaseURL(null, map, "text/html", "utf-8", null);
+    webview.loadUrl("file:///sdcard/AppInventor/assets/map.html");
+//    webview.loadDataWithBaseURL(null, map, "text/html", "utf-8", null);
 
   }
 
@@ -1040,8 +1043,8 @@ public class WebMap extends AndroidViewComponent {
     YailList newMarker = YailList.makeList(markerValues);
     String javaScriptCommand = "javascript:thisMap.getMarkerFunctions().setMarkerTitle('" +
         markerId + "', '" + title + "')";
-    Log.d(TAG, "JS command for SetMarkerTitle is: " + javaScriptCommand);
-    Log.d(TAG, "markerId for SetMarkerTitle is: " + markerId);
+    Log.d(LOG_TAG, "JS command for SetMarkerTitle is: " + javaScriptCommand);
+    Log.d(LOG_TAG, "markerId for SetMarkerTitle is: " + markerId);
     webview.loadUrl(javaScriptCommand);
 
     return newMarker;
@@ -1058,13 +1061,13 @@ public class WebMap extends AndroidViewComponent {
   }
 
   @SimpleFunction(description = "Get the Latitude of a particular marker.")
-  public long GetMarkerLatitude(YailList marker) {
-    return Long.valueOf(marker.getString(0)).longValue();
+  public double GetMarkerLatitude(YailList marker) {
+    return Double.valueOf(marker.getString(0)).doubleValue();
   }
 
   @SimpleFunction(description = "Get the Longitude of a particular marker.")
-  public long GetMarkerLongitude(YailList marker) {
-    return Long.valueOf(marker.getString(1)).longValue();
+  public double GetMarkerLongitude(YailList marker) {
+    return Double.valueOf(marker.getString(1)).doubleValue();
   }
 
   @SimpleFunction(description = "This function requests a list of lists that contains all of the " +
@@ -1191,7 +1194,7 @@ public class WebMap extends AndroidViewComponent {
     } catch (JSONException e) {
       //TODO (ajcolter) do something about this! Create an ErrorMessage for this
       e.printStackTrace();
-      Log.d(TAG, "Problem parsing the JSON that came from the JavaScript Click handler");
+      Log.d(LOG_TAG, "Problem parsing the JSON that came from the JavaScript Click handler");
     }
     return marker;
   }
@@ -1212,7 +1215,7 @@ public class WebMap extends AndroidViewComponent {
     } catch (JSONException e) {
       //TODO (ajcolter) do something about this! Create an ErrorMessage for this
       e.printStackTrace();
-      Log.d(TAG, "Problem parsing the JSON that came from the JavaScript Click handler");
+      Log.d(LOG_TAG, "Problem parsing the JSON that came from the JavaScript Click handler");
     }
     return polygon;
   }
@@ -1242,6 +1245,7 @@ public class WebMap extends AndroidViewComponent {
       "receive instructions. Anything done before the map is fully loaded might not have any " +
       "effect.")
   public void MapIsReady() {
+    SetCenter(initialLatLng);   // This should really be done when the map is loaded
     EventDispatcher.dispatchEvent(this, "MapIsReady");
   }
 
@@ -1285,13 +1289,13 @@ public class WebMap extends AndroidViewComponent {
      */
     @JavascriptInterface
     public void dispatchError(int errorNumber) {
-      Log.d(TAG, "Error triggered on map with errorNumber: " + errorNumber);
+      Log.d(LOG_TAG, "Error triggered on map with errorNumber: " + errorNumber);
       webViewForm.dispatchErrorOccurredEvent(webViewForm, "dispatchError", errorNumber);
     }
 
     @JavascriptInterface
     public void handleMarker(final String jsonMarker) {
-      Log.d(TAG, "Marker clicked: " + jsonMarker);
+      Log.d(LOG_TAG, "Marker clicked: " + jsonMarker);
       webViewForm.runOnUiThread(new Runnable() {
         @Override
         public void run() {
@@ -1302,7 +1306,7 @@ public class WebMap extends AndroidViewComponent {
 
     @JavascriptInterface
     public void handleDoubleMarker(final String jsonMarker) {
-      Log.d(TAG, "Marker DOUBLED clicked: " + jsonMarker);
+      Log.d(LOG_TAG, "Marker DOUBLED clicked: " + jsonMarker);
       webViewForm.runOnUiThread(new Runnable() {
         @Override
         public void run() {
@@ -1346,7 +1350,7 @@ public class WebMap extends AndroidViewComponent {
 
     @JavascriptInterface
     public void mapIsReady() {
-      Log.d(TAG, "MAP IS READY IS BEING CALLED!");
+      Log.d(LOG_TAG, "MAP IS READY IS BEING CALLED!");
       webViewForm.runOnUiThread(new Runnable() {
         @Override
         public void run() {
