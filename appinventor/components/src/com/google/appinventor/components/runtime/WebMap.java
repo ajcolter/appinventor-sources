@@ -825,7 +825,7 @@ public class WebMap extends AndroidViewComponent {
         "        sendGeolocationMarkerAddedToAndroid: function(markerJson, formattedAddress) {\n" +
         "          if (typeof AppInventorMap !== 'undefined')\n" +
         "            AppInventorMap.geolocationMarkerAdded(markerJson, formattedAddress);\n" +
-        "        }\n" +
+        "        },\n" +
         "\n" +
         "        sendPolygonAddedToAndroid: function(polygonJson) {\n" +
         "          if (typeof AppInventorMap !== 'undefined')\n" +
