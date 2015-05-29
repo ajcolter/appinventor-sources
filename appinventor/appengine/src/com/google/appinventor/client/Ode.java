@@ -1869,7 +1869,7 @@ public class Ode implements EntryPoint {
    * displayed.
    *
    * @param title The title for the dialog box
-   * @param message The message to display
+   * @param messageString The message to display
    * @param buttonString the name of the button, i.e., "OK"
    */
 

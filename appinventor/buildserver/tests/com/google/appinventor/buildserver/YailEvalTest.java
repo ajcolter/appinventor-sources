@@ -1182,7 +1182,6 @@ public class YailEvalTest extends TestCase {
      assertFalse((Boolean) scheme.eval("(exact? (yail-divide 2 3))"));
    }
 
-
    public void testConvertToStrings() throws Throwable {
      String schemeInputString = "(convert-to-strings (make-yail-list (/ 10 5) 2.0 \"abc\" 123 (list 4 5 6)))";
      String schemeExpectedResultString = "(2 2 abc 123 (4 5 6))";
