@@ -228,7 +228,7 @@ public class WebMap extends AndroidViewComponent {
     //NOTE (IMPORTANT) : Do not make changes to this string directly.
     // This string is pasted from a html file (located in root/tmp). IntelliJ does the escaping automatically.
     // TODO (user) when copying a new string, make sure to change the initialization of the
-    // thisMap object by adding the lngLat parameter instead of the hardcoded values. Also change
+    // mapContainer object by adding the lngLat parameter instead of the hardcoded values. Also change
     // the key when we get one. Coming up with a better way to do this would be good.
     String map = "<!DOCTYPE html>\n" +
         "<html>\n" +
@@ -249,44 +249,81 @@ public class WebMap extends AndroidViewComponent {
         "       * This map script is an abstraction of a number of functions from the Google maps\n" +
         "       * JavaScript API to be used within a customized WebView as an App Inventor Component.\n" +
         "       *\n" +
-        "       * It contains two main objects: thisMap and mapMarkers.\n" +
-        "       * thisMap initializes the map and makes use of mapMarkers, which simply encapsulates all\n" +
+        "       * It contains two main objects: mapContainer and mapMarkers.\n" +
+        "       * mapContainer initializes the map and makes use of mapMarkers, which simply encapsulates all\n" +
         "       * functions related to markers placed in the map. It is possible to create other utility\n" +
         "       * objects with other functionality in the SDK such as drawing, layers, or services.\n" +
         "       */\n" +
         "\n" +
         "      /**\n" +
-        "       * This function returns an object with certain methods exposed as its API. The functionality\n" +
-        "       * of this object is related to management of markers in the map.\n" +
-        "       * @returns an Object with methods related to Marker management.\n" +
-        "       * @param mapComponent the map to associate the markers with.\n" +
+        "       * Main function for this script. Initializes the map and all the related functionality.\n" +
+        "       *\n" +
         "       */\n" +
-        "      var mapMarkers = function(mapComponent) {\n" +
+        "      var mapContainer = function(centerLat, centerLng, showCenter, initialZoom) {\n" +
+        "      \n" +
+        "        var map;\n" +
+        "        var centerMarker;\n" +
+        "        var markerFunctions;\n" +
+        "        var allMarkers = {};\n" +
+        "        var zoom = initialZoom || 6;\n" +
+        "        var showingCenter = showCenter || true;\n" +
+        "        var centerCoords = new google.maps.LatLng(centerLat, centerLng)\n" +
+        "        function initialize() {\n" +
+        "          var mapOptions = {\n" +
+        "            zoom: zoom,\n" +
+        "            center: centerCoords,\n" +
+        "            disableDoubleClickZoom: true\n" +
+        "          };\n" +
+        "          map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);\n" +
+        "          //centerMarker = setCenter(centerCoords);\n" +
+        "          //showCenter(showingCenter);\n" +
         "\n" +
-        "        if (!mapComponent) throw new Error('No map available');\n" +
+        "          //Initialize marker functions object, exposes the marker functions.\n" +
+        "          //markerFunctions = markerObject(mapContainer);\n" +
+        "          \n" +
+        "        };\n" +
         "\n" +
-        "        function AIMarker(marker){\n" +
-        "          if (marker instanceof google.maps.Marker){\n" +
-        "            this.marker = marker;\n" +
-        "            this.id = marker.getPosition().toString(); //Use position as unique id\n" +
+        "        var setCenter = function(location){\n" +
+        "          if (centerMarker) \n" +
+        "            centerMarker.setMap(null); // Delete any existing center first.\n" +
+        "\n" +
+        "          centerMarker = createMarker(location, 'Map Center');\n" +
+        "          centerMarker.setIcon({path: google.maps.SymbolPath.CIRCLE,\n" +
+        "                scale: 6})\n" +
+        "          //TODO: include a pan to center?\n" +
+        "          return centerMarker;\n" +
+        "        };\n" +
+        "\n" +
+        "        // Special case of showing a marker only for the center. Might be possible to abstract in\n" +
+        "        // markerFunctions, but leaving it here for now (jos).\n" +
+        "        var showCenter = function(show){\n" +
+        "          if (show) {\n" +
+        "            if (centerMarker)\n" +
+        "              centerMarker.setMap(map);\n" +
         "          } else {\n" +
-        "            console.log('Calling Error handler on Android side - Invalid Marker');\n" +
-        "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_INVALID_MARKER);\n" +
+        "            centerMarker.setMap(null);\n" +
         "          }\n" +
+        "\n" +
+        "          showingCenter = show;\n" +
+        "        };\n" +
+        "\n" +
+        "        var getCenter = function() { return centerMarker; }\n" +
+        "\n" +
+        "        var getGoogleMapObject = function() { return map; };\n" +
+        "\n" +
+        "        //not sure why we need this getter; what is the use case for needing these functions?\n" +
+        "        var getMarkerFunctions = function() { return markerFunctions; };\n" +
+        "\n" +
+        "        var getAllMarkers = function() { return allMarkers; };\n" +
+        "\n" +
+        "        var getMarker = function(location) {\n" +
+        "          return allMarkers[location.toString()];\n" +
+        "        };\n" +
+        "\n" +
+        "        var getMap = function() {\n" +
+        "          return map;\n" +
         "        }\n" +
         "\n" +
-        "        AIMarker.prototype.equals = function(otherMarker){\n" +
-        "          if (otherMarker == null) return false;\n" +
-        "          if (otherMarker instanceof AIMarker){\n" +
-        "            //Equality is based on position - two markers on the same position are the same marker\n" +
-        "            return this.marker.getPosition().toString() ===\n" +
-        "              otherMarker.marker.getPosition().toString();\n" +
-        "          }\n" +
-        "          return false;\n" +
-        "\n" +
-        "        }\n" +
-        "\n" +
-        "        var aiMarkers = {};\n" +
         "\n" +
         "        /**\n" +
         "         * Add a marker, with additional information, to the map.\n" +
@@ -294,75 +331,56 @@ public class WebMap extends AndroidViewComponent {
         "         * @param infoWindowContent content to be displayed in this marker infoWindow\n" +
         "         * @param title a title for the marker (shown on hover in browsers)\n" +
         "         */\n" +
-        "        var addAIMarker = function(location, title, infoWindowContent){\n" +
-        "          var newAiMarker, marker;\n" +
-        "          if (location instanceof google.maps.LatLng){\n" +
-        "            newAiMarker = aiMarkers[location.toString()];\n" +
-        "            if (newAiMarker) { //If it exists, there's no need to create it\n" +
-        "              marker = newAiMarker.marker;\n" +
-        "              // We override values even if they are not different - it's easier.\n" +
-        "              marker.title = title;\n" +
-        "              if (infoWindowContent && marker.info){\n" +
-        "                marker.info.setContent(infoWindowContent);\n" +
-        "              }\n" +
-        "            } else {\n" +
-        "              marker = new google.maps.Marker({\n" +
-        "                position: location,\n" +
-        "                title: title || '',\n" +
-        "                map: mapComponent\n" +
-        "              });\n" +
-        "\n" +
-        "              newAiMarker = new AIMarker(marker);\n" +
-        "              var theId = newAiMarker.id;\n" +
-        "              google.maps.event.addListener(marker, 'click', markerClicked(theId));\n" +
-        "              google.maps.event.addListener(marker, 'dblclick', markerClicked(theId, true));\n" +
-        "              aiMarkers[marker.getPosition().toString()] = newAiMarker;\n" +
-        "\n" +
-        "              if (infoWindowContent) {\n" +
-        "                createInfoWindow(theId, infoWindowContent);\n" +
-        "              }\n" +
-        "            }\n" +
+        "        var createMarker = function(location, title) {//, infoWindowContent){ \n" +
+        "          var marker;\n" +
+        "          var loc;\n" +
+        "          var lat;\n" +
+        "          var lng;\n" +
+        "          var existingMarker;\n" +
+        "          if (location instanceof google.maps.LatLng) {\n" +
+        "            loc = location;\n" +
+        "          } else if (typeof location === \"string\") {\n" +
+        "            loc = locationFromTextCoords(location);\n" +
+        "          } else if (location.length == 2) {\n" +
+        "            loc = locationFromLatLngCoords(location[0], location[1]);\n" +
         "          } else {\n" +
-        "            console.log('Calling Error handler on Android side');\n" +
-        "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);\n" +
+        "            //try geolocating from address\n" +
+        "            //else throw error\n" +
+        "            console.log(\"No valid location.\");\n" +
+        "            return null;\n" +
         "          }\n" +
+        "          lat = loc.lat();\n" +
+        "          lng = loc.lng();\n" +
         "\n" +
-        "          return newAiMarker;\n" +
-        "        };\n" +
+        "          existingMarker = getMarker(loc);\n" +
+        "          if (existingMarker) { //If it exists, there's no need to create it\n" +
+        "            marker = existingMarker;\n" +
         "\n" +
-        "        // Closure needed to associate each markerId with its click handler function\n" +
-        "        function markerClicked(markerId, doubleClick) {\n" +
-        "          return function(){\n" +
-        "            handleMarkerById(markerId, doubleClick);\n" +
+        "            // We override values even if they are not different - it's easier.\n" +
+        "            // marker.title = title;\n" +
+        "            // if (infoWindowContent && marker.info){\n" +
+        "            //   marker.info.setContent(infoWindowContent);\n" +
+        "            // }\n" +
+        "          } else {\n" +
+        "            marker = new markerContainer(map, lat, lng, title, null, null, true, true);\n" +
+        "            addMarker(marker);\n" +
+        "\n" +
+        "            // if (infoWindowContent) {\n" +
+        "            //   markerFunctions.createInfoWindow(marker.getPosition().toString(), infoWindowContent);\n" +
+        "            // }\n" +
         "          }\n" +
-        "        }\n" +
+        "        // } else if () {\n" +
         "\n" +
-        "        function handleMarkerById(markerId, doubleClick) {\n" +
-        "          var markerJson = createJsonMarkerFromId(markerId);\n" +
-        "          if (doubleClick)\n" +
-        "            androidObject.sendDoubleMarkerToAndroid(markerJson);\n" +
-        "          else\n" +
-        "            androidObject.sendMarkerToAndroid(markerJson);\n" +
-        "        }\n" +
+        "        //   // if {\n" +
         "\n" +
-        "        function createJsonMarkerFromId(markerId){\n" +
-        "          var currentAiMarker = aiMarkers[markerId];\n" +
-        "          var markerObject = {\n" +
-        "            lat: currentAiMarker.marker.getPosition().lat(),\n" +
-        "            lng: currentAiMarker.marker.getPosition().lng(),\n" +
-        "            title: currentAiMarker.marker.title || '',\n" +
-        "            info: (currentAiMarker.marker.info && currentAiMarker.marker.info.content) ?\n" +
-        "              currentAiMarker.marker.info.content : ''\n" +
-        "          }\n" +
-        "          var markerJson = JSON.stringify(markerObject);\n" +
+        "        //   // } else {\n" +
+        "        //   //   console.log('Calling Error handler on Android side');\n" +
+        "        //   //   return null;\n" +
+        "        //   // }\n" +
+        "        // }\n" +
         "\n" +
-        "          return markerJson;\n" +
-        "        }\n" +
+        "          return marker;\n" +
         "\n" +
-        "        var panToMarker = function(markerId) {\n" +
-        "          var markerToPanTo = aiMarkers[markerId].marker;\n" +
-        "          if (markerToPanTo)\n" +
-        "            mapComponent.panTo(markerToPanTo.getPosition());\n" +
         "        };\n" +
         "\n" +
         "        /**\n" +
@@ -374,13 +392,13 @@ public class WebMap extends AndroidViewComponent {
         "         *  ]\"\n" +
         "         * @param listOfMarkers a JSON representation of the markers to be displayed\n" +
         "         */\n" +
-        "        var addMarkersFromList = function(listOfMarkers) {\n" +
-        "          var allMarkers = [];\n" +
+        "         //TODO: Do we really want to have a json list? what about a yaillist? or the app inventor list structure?\n" +
+        "        var createMarkersFromList = function(listOfMarkers) {\n" +
         "          try {\n" +
-        "            allMarkers = JSON.parse(listOfMarkers);\n" +
+        "            var allParsedMarkers = JSON.parse(listOfMarkers);\n" +
         "          } catch(parseError) {\n" +
         "            console.log('List of Markers is not valid JSON. Notifying Android side.');\n" +
-        "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_PARSING_MARKERS_LIST)\n" +
+        "            return;\n" +
         "          }\n" +
         "\n" +
         "          function decodeMarker(markerObject){\n" +
@@ -409,27 +427,42 @@ public class WebMap extends AndroidViewComponent {
         "              return null;\n" +
         "          }\n" +
         "\n" +
-        "          allMarkers.forEach(function(markerObject) {\n" +
+        "          allParsedMarkers.forEach(function(markerObject) {\n" +
         "            // Try to decode each marker and even if some fail, still add the others.\n" +
         "            var markerData = decodeMarker(markerObject);\n" +
         "            if (markerData)\n" +
-        "              addAIMarker(markerData[0], markerData[1], markerData[2]);\n" +
+        "              createMarker(markerData[0], markerData[1], markerData[2]);\n" +
         "          });\n" +
-        "        }\n" +
+        "        };\n" +
+        "\n" +
+        "\n" +
+        "        //TODO Verify the marker isn't already in the dict? If it is already in the dict it will be overwritten.\n" +
+        "        var addMarker = function(marker) {\n" +
+        "          var loc = marker.getPosition().toString();\n" +
+        "          allMarkers[loc] = marker;\n" +
+        "        };\n" +
+        "\n" +
+        "        var addMarkersFromList = function(markerList) {\n" +
+        "          for (i = 0; i < markerList.length; i++) {\n" +
+        "            if (!getMarker(markerList[i].prototype.getPosition().toString())) {\n" +
+        "              addMarker(markerList[i]);\n" +
+        "            }\n" +
+        "          }\n" +
+        "          showMarkers(true);\n" +
+        "        };\n" +
+        "        \n" +
         "        var locationFromLatLngCoords = function(lat, lng){\n" +
         "          var errorParsing = false;\n" +
-        "          //DO WE NEED TO DO THIS? the LatLng will wrap the coordinates. \n" +
         "          if (isNaN(lat) || isNaN(lng)) errorParsing = true;\n" +
-        "          if (lat < -90 || lat > 90) errorParsing = true;\n" +
-        "          if (lng < -180 || lng > 180) errorParsing = true;\n" +
+        "          //DO WE NEED TO DO THIS? the LatLng will clamp or wrap the coordinates. \n" +
+        "          // if (lat < -90 || lat > 90) errorParsing = true;\n" +
+        "          // if (lng < -180 || lng > 180) errorParsing = true;\n" +
         "\n" +
         "          if (errorParsing) {\n" +
-        "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);\n" +
         "            return null;\n" +
         "          } else {\n" +
         "            return new google.maps.LatLng(lat, lng);\n" +
         "          }\n" +
-        "\n" +
         "        };\n" +
         "\n" +
         "        /**\n" +
@@ -441,268 +474,340 @@ public class WebMap extends AndroidViewComponent {
         "         */\n" +
         "        var locationFromTextCoords = function(locationText) {\n" +
         "          var lat, lng;\n" +
-        "\n" +
         "          var locationSplit = locationText.split(',');\n" +
         "          if (locationSplit.length === 2){\n" +
         "            lat = parseFloat(locationSplit[0]);\n" +
         "            lng = parseFloat(locationSplit[1]);\n" +
         "            return locationFromLatLngCoords(lat, lng);\n" +
         "          } else {\n" +
-        "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_ILLEGAL_COORDS_FORMAT);\n" +
         "            return null;\n" +
-        "          }\n" +
-        "        };\n" +
-        "\n" +
-        "        var addListenersForMarkers = function (add) {\n" +
-        "          if (add){\n" +
-        "            google.maps.event.addListener(mapComponent, 'click', function(event) {\n" +
-        "              var aiMarker = addAIMarker(event.latLng);\n" +
-        "              var markerJson = createJsonMarkerFromId(aiMarker.id);\n" +
-        "              androidObject.sendUserMarkerAddedToAndroid(markerJson);\n" +
-        "            });\n" +
-        "          } else\n" +
-        "            google.maps.event.clearListeners(mapComponent,'click');\n" +
-        "        };\n" +
-        "\n" +
-        "        var showMarker = function(markerId, show) {\n" +
-        "          var markerToShow = aiMarkers[markerId].marker;\n" +
-        "          if (show) {\n" +
-        "            if (markerToShow){\n" +
-        "              markerToShow.setMap(mapComponent);\n" +
-        "            }\n" +
-        "          } else {\n" +
-        "            if (markerToShow) {\n" +
-        "              markerToShow.setMap(null);\n" +
-        "            }\n" +
         "          }\n" +
         "        };\n" +
         "\n" +
         "        var showMarkers = function (show){\n" +
         "          if (show) {\n" +
-        "            for (var key in aiMarkers){\n" +
-        "              aiMarkers[key].marker.setMap(mapComponent);\n" +
+        "            for (var key in allMarkers){\n" +
+        "              getMarker(key).setMap(map);\n" +
         "            }\n" +
         "          } else {\n" +
-        "            for (var key in aiMarkers){\n" +
-        "              aiMarkers[key].marker.setMap(null);\n" +
+        "            for (var key in allMarkers){\n" +
+        "              getMarker(key).setMap(null);\n" +
         "            }\n" +
         "          }\n" +
-        "        };\n" +
-        "\n" +
-        "        var deleteMarkers = function (){\n" +
-        "          showMarkers(false);\n" +
-        "          aiMarkers = {};\n" +
-        "        };\n" +
-        "\n" +
-        "        var storeMarkers = function () {\n" +
-        "          var allMarkers = [];\n" +
-        "          for (var key in aiMarkers){\n" +
-        "            var marker = aiMarkers[key].marker;\n" +
-        "\n" +
-        "            var jsMarker = {};\n" +
-        "            jsMarker.lat = marker.getPosition().lat();\n" +
-        "            jsMarker.lng = marker.getPosition().lng();\n" +
-        "            jsMarker.title = marker.title || '';\n" +
-        "            if (marker.info && marker.info.content)\n" +
-        "              jsMarker.content = marker.info.content;\n" +
-        "            else\n" +
-        "              jsMarker.content = '';\n" +
-        "\n" +
-        "            allMarkers.push(jsMarker);\n" +
-        "          }\n" +
-        "\n" +
-        "          androidObject.sendListOfMarkersToAndroid(JSON.stringify(allMarkers));\n" +
-        "\n" +
-        "          return allMarkers;\n" +
         "        };\n" +
         "\n" +
         "        //Geolocation service\n" +
-        "        var geolocate = function (address){\n" +
+        "        var getGeolocationFromAddress = function (address){\n" +
         "          var geocoder = new google.maps.Geocoder();\n" +
         "          geocoder.geocode({address: address}, geolocationResults)\n" +
         "        };\n" +
         "\n" +
         "        function geolocationResults(results, status){\n" +
-        "          var notifyAndroid = false;\n" +
         "          if (status === 'OK') {\n" +
         "            var firstLocationFound = results[0].geometry.location;\n" +
         "            if (firstLocationFound){\n" +
-        "              console.log(firstLocationFound);\n" +
-        "              var marker = addAIMarker(firstLocationFound);\n" +
-        "              var markerJson = createJsonMarkerFromId(marker.id);\n" +
-        "              androidObject.sendGeolocationMarkerAddedToAndroid(markerJson,\n" +
-        "                                                                results[0].formatted_address);\n" +
+        "              console.log(\"First loc:\", firstLocationFound);\n" +
+        "              var marker = createMarker(firstLocationFound);\n" +
+        "              var markerJson = createJsonMarkerFromId(marker.prototype.getPosition().toString());\n" +
+        "              // return firstLocationFound;\n" +
         "            } else {\n" +
         "              console.log('No location found!');\n" +
-        "              notifyAndroid = true;\n" +
         "            }\n" +
         "          } else if (status === \"ZERO_RESULTS\"){\n" +
         "            console.log('No results found for that particular address.');\n" +
-        "            notifyAndroid = true;\n" +
         "          } else {\n" +
         "            console.log('No results found. Status of Geolocation call: ' + status);\n" +
-        "            notifyAndroid = true;\n" +
-        "          }\n" +
-        "\n" +
-        "          if (notifyAndroid) {\n" +
-        "            console.log('Notifying the Android side: No Results from Geolocation.')\n" +
-        "            androidObject.dispatchErrorToAndroid(androidObject.ERROR_NO_GEOLOCATION_RESULTS);\n" +
         "          }\n" +
         "        };\n" +
         "\n" +
-        "        // InfoWindow functions\n" +
-        "        var createInfoWindow = function(markerId, content) {\n" +
-        "          var infoWindow = new google.maps.InfoWindow({\n" +
-        "            content: content\n" +
-        "          });\n" +
-        "          var marker = aiMarkers[markerId].marker;\n" +
-        "          if (marker)\n" +
-        "            marker.info = infoWindow;\n" +
+        "        var deleteAllMarkers = function() {\n" +
+        "          showMarkers(false);\n" +
+        "          allMarkers = {};\n" +
         "        };\n" +
         "\n" +
-        "        var openInfoWindow = function(markerId){\n" +
-        "          var marker = aiMarkers[markerId].marker;\n" +
-        "          if (marker && marker.info)\n" +
-        "            marker.info.open(mapComponent, marker);\n" +
-        "        };\n" +
-        "\n" +
-        "        var closeInfoWindow = function(markerId){\n" +
-        "          var marker = aiMarkers[markerId].marker;\n" +
-        "          if (marker && marker.info)\n" +
-        "            marker.info.close();\n" +
-        "        };\n" +
-        "\n" +
-        "        var setMarkerTitle = function(markerId, title) {\n" +
-        "          var marker = aiMarkers[markerId].marker;\n" +
-        "          if (marker)\n" +
-        "            marker.setTitle(title);\n" +
-        "        };\n" +
-        "\n" +
-        "        //API for the mapMarkers object\n" +
-        "        //MUST ADD FUNCTION HANDLES HERE\n" +
-        "        return {\n" +
-        "          addMarkersFromList: addMarkersFromList,\n" +
-        "          addListenersForMarkers: addListenersForMarkers,\n" +
-        "          showMarker: showMarker,\n" +
-        "          showMarkers: showMarkers,\n" +
-        "          deleteMarkers: deleteMarkers,\n" +
-        "          storeMarkers: storeMarkers,\n" +
-        "          geolocate: geolocate,\n" +
-        "          panToMarker: panToMarker,\n" +
-        "          createInfoWindow: createInfoWindow,\n" +
-        "          openInfoWindow: openInfoWindow,\n" +
-        "          closeInfoWindow: closeInfoWindow,\n" +
-        "          locationFromTextCoords: locationFromTextCoords,\n" +
-        "          locationFromLatLngCoords: locationFromLatLngCoords,\n" +
-        "          setMarkerTitle: setMarkerTitle,\n" +
-        "          addAIMarker: addAIMarker,\n" +
-        "          aiMarkers: aiMarkers,\n" +
-        "        };\n" +
-        "\n" +
-        "      };\n" +
-        "\n" +
-        "\n" +
-        "      /**\n" +
-        "       * Main function for this script. Initializes the map and all the related functionality.\n" +
-        "       *\n" +
-        "       */\n" +
-        "      var thisMap = function(centerLat, centerLng, showCenter, initialZoom){\n" +
-        "\n" +
-        "        var map;\n" +
-        "        var centerMarker;\n" +
-        "        var markerFunctions;\n" +
-        "        var zoom = initialZoom || 6;\n" +
-        "        var showingCenter = showCenter || true;\n" +
-        "        function initialize() {\n" +
-        "          var mapOptions = {\n" +
-        "            zoom: zoom,\n" +
-        "            center: new google.maps.LatLng(centerLat, centerLng),\n" +
-        "            disableDoubleClickZoom: true\n" +
-        "          };\n" +
-        "          mapComponent = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);\n" +
-        "\n" +
-        "          // Listening for the first 'idle' event to tell Android that the map is ready\n" +
-        "          google.maps.event.addListenerOnce(mapComponent, 'idle', function(){\n" +
-        "            console.log('Triggering mapIsReady on Android side.');\n" +
-        "            androidObject.mapIsReadyToAndroid();\n" +
-        "          });\n" +
-        "\n" +
-        "          centerMarker = createCenter();\n" +
-        "          showCenter(showingCenter);\n" +
-        "\n" +
-        "          //Initialize marker functions object\n" +
-        "          markerFunctions = mapMarkers(mapComponent);\n" +
-        "\n" +
-        "        }\n" +
-        "\n" +
-        "        var createCenter = function(){\n" +
-        "          if (centerMarker) centerMarker.setMap(null); // Delete any existing center first.\n" +
-        "          var newCenter;\n" +
-        "          if (mapComponent && mapComponent.getCenter()){\n" +
-        "            newCenter = new google.maps.Marker({\n" +
-        "              position: mapComponent.getCenter(),\n" +
-        "              map: mapComponent,\n" +
-        "              title: 'Map Center',\n" +
-        "              icon: {\n" +
-        "                path: google.maps.SymbolPath.CIRCLE,\n" +
-        "                scale: 6\n" +
-        "              }\n" +
-        "            });\n" +
-        "          }\n" +
-        "          return newCenter;\n" +
-        "        };\n" +
-        "\n" +
-        "        // Special case of showing a marker only for the center. Might be possible to abstract in\n" +
-        "        // markerFunctions, but leaving it here for now (jos).\n" +
-        "        var showCenter = function(show){\n" +
-        "          if (show){\n" +
-        "            if (centerMarker)\n" +
-        "              centerMarker.setMap(mapComponent);\n" +
-        "            else\n" +
-        "              centerMarker = createCenter();\n" +
-        "          } else {\n" +
-        "            centerMarker.setMap(null);\n" +
+        "        var deleteMarker = function(markerId) {\n" +
+        "          if (allMarkers[markerId]) {\n" +
+        "            allMarkers[markerId].setMap(null);\n" +
+        "            delete allMarkers[markerId];\n" +
         "          }\n" +
         "\n" +
-        "          showingCenter = show;\n" +
         "        };\n" +
-        "\n" +
-        "        var setCenter = function(location){\n" +
-        "          if (location instanceof google.maps.LatLng){\n" +
-        "            mapComponent.setCenter(location);\n" +
-        "          } else {\n" +
-        "            mapComponent.setCenter(markerFunctions.locationFromTextCoords(location));\n" +
-        "          }\n" +
-        "\n" +
-        "          centerMarker = createCenter();\n" +
-        "          showCenter(showingCenter);\n" +
-        "        };\n" +
-        "\n" +
-        "        var getMap = function() { return mapComponent; };\n" +
-        "        var getMarkerFunctions = function() { return markerFunctions; };\n" +
         "\n" +
         "        var setZoom = function(zoom) {\n" +
         "          if (zoom >= 0 && zoom <= 19){\n" +
-        "            mapComponent.setZoom(zoom);\n" +
+        "            map.setZoom(zoom);\n" +
         "          } else { // Exception handling is also done on Android side\n" +
         "            console.log('Zoom value ' + zoom + ' is not in the valid range 0-19');\n" +
         "          }\n" +
         "        };\n" +
         "\n" +
-        "        var getZoom = function() { return mapComponent.zoom; };\n" +
+        "        var getZoom = function() { return map.zoom; };\n" +
         "\n" +
-        "        //API for the thisMap object: main entry object for functionality\n" +
+        "        var panToMarker = function(markerId) {\n" +
+        "          var markerToPanTo = getMarker(markerId);\n" +
+        "          if (markerToPanTo)\n" +
+        "            map.panTo(markerToPanTo.getPosition());\n" +
+        "        };\n" +
+        "\n" +
+        "        //API for the mapContainer object: main entry object for functionality\n" +
         "        return {\n" +
         "          initialize: initialize,\n" +
         "          showCenter: showCenter,\n" +
         "          setCenter: setCenter,\n" +
-        "          getMap: getMap, // For Debugging (not used from the component).\n" +
+        "          getCenter: getCenter,\n" +
+        "          getGoogleMapObject: getGoogleMapObject, // For Debugging (not used from the component).\n" +
         "          getMarkerFunctions: getMarkerFunctions,\n" +
+        "          getAllMarkers: getAllMarkers,\n" +
+        "          getMarker: getMarker,\n" +
+        "          createMarker: createMarker,\n" +
+        "          createMarkersFromList: createMarkersFromList,\n" +
+        "          addMarkersFromList: addMarkersFromList,\n" +
+        "          locationFromLatLngCoords: locationFromLatLngCoords,\n" +
+        "          locationFromTextCoords: locationFromTextCoords,\n" +
+        "          getGeolocationFromAddress: getGeolocationFromAddress,\n" +
+        "          showMarkers: showMarkers,\n" +
+        "          deleteMarker: deleteMarker,\n" +
+        "          deleteAllMarkers: deleteAllMarkers,\n" +
         "          setZoom: setZoom,\n" +
-        "          getZoom: getZoom\n" +
+        "          getZoom: getZoom,\n" +
+        "          panToMarker: panToMarker,\n" +
+        "          getMap: getMap\n" +
         "        }\n" +
-        "        //TODO (jos) Magic numbers: the center of the map will come from Android\n" +
-        "      }(43.473847, -8.169154, true, 6); //Auto initialize the thisMap object\n" +
+        "      //TODO (jos) Magic numbers: the center of the map will come from Android\n" +
+        "      } (42.3598, -71.0921, true, 2); //Auto initialize the mapContainer object\n" +
+        "\n" +
+        "\n" +
+        "      function markerContainer(map, lat, lng, title, icon, clickable, visible) {\n" +
+        "        \n" +
+        "        this.map = map;\n" +
+        "        this.icon = icon || null;\n" +
+        "        this.clickable = clickable || true;\n" +
+        "        this.visible = visible || true;\n" +
+        "\n" +
+        "        var markerOptions = {\n" +
+        "            map: this.map,\n" +
+        "            position: {lat: lat, lng: lng},\n" +
+        "            title: title,\n" +
+        "            icon: this.icon,\n" +
+        "            clickable: this.clickable,\n" +
+        "            visible: this.visible\n" +
+        "          };\n" +
+        "\n" +
+        "        this.marker = new google.maps.Marker(markerOptions);\n" +
+        "        this.id = this.marker.getPosition().toString();\n" +
+        "        return this.marker;\n" +
+        "      }\n" +
+        "\n" +
+        "      markerContainer.prototype.deleteMarker = function() {\n" +
+        "        this.marker.setMap(null);\n" +
+        "        this.id = null;\n" +
+        "\n" +
+        "        delete this.marker; //does this work??\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.equals = function(otherMarker) {\n" +
+        "        return this === otherMarker;\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.getId = function() {\n" +
+        "        return this.id;\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.getIcon = function() {\n" +
+        "        return this.marker.getIcon();\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.getMap = function() {\n" +
+        "        return this.marker.getMap();\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.getTitle = function() {\n" +
+        "        return this.marker.getTitle();\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.getClickable = function() {\n" +
+        "        return this.marker.getClickable();\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.getPosition = function() {\n" +
+        "        return this.marker.getPosition();\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.getVisible = function() {\n" +
+        "        return this.marker.getVisible();\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.getMarkerObject = function() {\n" +
+        "        return this.marker;\n" +
+        "      }\n" +
+        "\n" +
+        "      markerContainer.prototype.setIcon = function(icon) {\n" +
+        "        this.marker.setIcon(icon);\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.setMap = function(map) {\n" +
+        "        this.marker.setMap(map);\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.setTitle = function(title) {\n" +
+        "        this.marker.setTitle(title);\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.setClickable = function(clickable) {\n" +
+        "        this.marker.setClickable(clickable);\n" +
+        "      }\n" +
+        "\n" +
+        "      markerContainer.prototype.setPosition = function(lat, lng) {\n" +
+        "        //TODO convert to LatLng object\n" +
+        "        this.marker.setPosition({lat: lat, lng: lng});\n" +
+        "      };\n" +
+        "\n" +
+        "      markerContainer.prototype.setVisible = function(visible) {\n" +
+        "        this.marker.setVisible(visible);\n" +
+        "      };\n" +
+        "\n" +
+        "        // return {\n" +
+        "        //   deleteMarker: deleteMarker,\n" +
+        "        //   equals: equals,\n" +
+        "        //   getId: getId,\n" +
+        "        //   getIcon: getIcon,\n" +
+        "        //   getMap: getMap,\n" +
+        "        //   getTitle: getTitle,\n" +
+        "        //   getClickable: getClickable,\n" +
+        "        //   getPosition: getPosition,\n" +
+        "        //   getVisible: getVisible,\n" +
+        "        //   getMarkerObject: getMarkerObject,\n" +
+        "        //   setIcon: setIcon,\n" +
+        "        //   setMap: setMap,\n" +
+        "        //   setTitle: setTitle,\n" +
+        "        //   setClickable: setClickable,\n" +
+        "        //   setPosition: setPosition,\n" +
+        "        //   setVisible: setVisible\n" +
+        "        // }\n" +
+        "\n" +
+        "\n" +
+        "      /**\n" +
+        "       * This function returns an object with certain methods exposed as its API. The functionality\n" +
+        "       * of this object is related to management of markers in the map.\n" +
+        "       * @returns an Object with methods related to Marker management.\n" +
+        "       * @param map the map to associate the markers with. mapContainer object from above.\n" +
+        "       */\n" +
+        "      // var markerObject = function(map) {\n" +
+        "\n" +
+        "      //   if (!map) throw new Error('No map available'); \n" +
+        "      //   //if there is no map, the marker should just disappear/shouldn't exist. Don't think we need to throw an error...\n" +
+        "\n" +
+        "      //   var getId = function(marker) {\n" +
+        "      //     return marker.getPosition().toString();\n" +
+        "      //   };\n" +
+        "\n" +
+        "      //   var equals = function(otherMarker) {\n" +
+        "      //     if (otherMarker == null) return false;\n" +
+        "      //     if (otherMarker instanceof AIMarker){\n" +
+        "      //       //Equality is based on position - two markers on the same position are the same marker\n" +
+        "      //       return this.marker.getPosition().toString() ===\n" +
+        "      //           otherMarker.marker.getPosition().toString();\n" +
+        "      //     }\n" +
+        "      //     return false;\n" +
+        "\n" +
+        "      //   };\n" +
+        "\n" +
+        "      //   // Closure needed to associate each markerId with its click handler function\n" +
+        "      //   function doubleClicked(markerId, doubleClick) {\n" +
+        "      //     return function(){\n" +
+        "      //       doubleClickHandler(markerId, doubleClick);\n" +
+        "      //     }\n" +
+        "      //   }\n" +
+        "\n" +
+        "      //   function doubleClickHandler(markerId, doubleClick) {\n" +
+        "      //     var markerJson = createJsonMarkerFromId(markerId);\n" +
+        "      //   }\n" +
+        "\n" +
+        "      //   function createJsonMarkerFromId(markerId){\n" +
+        "      //     var currentMarker = map.getMarker(markerId);\n" +
+        "      //     var markerObject = {\n" +
+        "      //       lat: currentMarker.getPosition().lat(),\n" +
+        "      //       lng: currentMarker.getPosition().lng(),\n" +
+        "      //       title: currentMarker.title || '',\n" +
+        "      //       info: (currentMarker.info && currentMarker.info.content) ?\n" +
+        "      //           currentMarker.info.content : ''\n" +
+        "      //     }\n" +
+        "      //     var markerJson = JSON.stringify(markerObject);\n" +
+        "\n" +
+        "      //     return markerJson;\n" +
+        "      //   }\n" +
+        "\n" +
+        "      //   var addListenersForMarkers = function (add) {\n" +
+        "      //     if (add){\n" +
+        "      //       google.maps.event.addListener(map, 'click', function(event) {\n" +
+        "      //         var aiMarker = addMarker(event.latLng);\n" +
+        "      //         var markerJson = createJsonMarkerFromId(aiMarker.prototype.getPosition().toString());\n" +
+        "      //       });\n" +
+        "      //     } \n" +
+        "      //     else\n" +
+        "      //       google.maps.event.clearListeners(map,'click');\n" +
+        "      //   };\n" +
+        "\n" +
+        "      //   var showMarker = function(markerId, show) {\n" +
+        "      //     var markerToShow = map.getMarker(markerId);\n" +
+        "      //     if (show) {\n" +
+        "      //       if (markerToShow){\n" +
+        "      //         markerToShow.setMap(map);\n" +
+        "      //       }\n" +
+        "      //     } else {\n" +
+        "      //       if (markerToShow) {\n" +
+        "      //         markerToShow.setMap(null);\n" +
+        "      //       }\n" +
+        "      //     }\n" +
+        "      //   };\n" +
+        "\n" +
+        "      //   var deleteMarker = function(markerId) {\n" +
+        "      //     showMarker(markerId, false);\n" +
+        "      //     map.deleteMarker(markerId);\n" +
+        "      //   }\n" +
+        "\n" +
+        "      //   // InfoWindow functions\n" +
+        "      //   // TODO this is circular, needs to use \"this\" marker object\n" +
+        "      //   var createInfoWindow = function(markerId, content) {\n" +
+        "      //     var infoWindow = new google.maps.InfoWindow({\n" +
+        "      //       content: content\n" +
+        "      //     });\n" +
+        "      //     var marker = map.getMarker(markerId);\n" +
+        "      //     if (marker)\n" +
+        "      //       marker.info = infoWindow;\n" +
+        "      //   };\n" +
+        "\n" +
+        "      //   var openInfoWindow = function(markerId){\n" +
+        "      //     var marker = map.getMarker(markerId);\n" +
+        "      //     if (marker && marker.info)\n" +
+        "      //       marker.info.open(map, marker);\n" +
+        "      //   };\n" +
+        "\n" +
+        "      //   var closeInfoWindow = function(markerId){\n" +
+        "      //     var marker = map.getMarker(markerId);\n" +
+        "      //     if (marker && marker.info)\n" +
+        "      //       marker.info.close();\n" +
+        "      //   };\n" +
+        "\n" +
+        "      //   var setMarkerTitle = function(markerId, title) {\n" +
+        "      //     var marker = map.getMarker(markerId);\n" +
+        "      //     if (marker)\n" +
+        "      //       marker.setTitle(title);\n" +
+        "      //   };\n" +
+        "\n" +
+        "      //   //API for the mapMarkers object\n" +
+        "      //   //MUST ADD FUNCTION HANDLES HERE\n" +
+        "      //   return {\n" +
+        "      //     addListenersForMarkers: addListenersForMarkers,\n" +
+        "      //     showMarker: showMarker,\n" +
+        "      //     deleteMarker: deleteMarker,\n" +
+        "      //     createInfoWindow: createInfoWindow,\n" +
+        "      //     openInfoWindow: openInfoWindow,\n" +
+        "      //     closeInfoWindow: closeInfoWindow,\n" +
+        "      //     setMarkerTitle: setMarkerTitle,\n" +
+        "      //   };\n" +
+        "\n" +
+        "      // };\n" +
         "\n" +
         "      /**\n" +
         "       * An object to hold functions that communicate directly to Android through the JS interface.\n" +
@@ -773,11 +878,11 @@ public class WebMap extends AndroidViewComponent {
         "        sendGeolocationMarkerAddedToAndroid: function(markerJson, formattedAddress) {\n" +
         "          if (typeof AppInventorMap !== 'undefined')\n" +
         "            AppInventorMap.geolocationMarkerAdded(markerJson, formattedAddress);\n" +
-        "        },\n" +
+        "        }\n" +
         "\n" +
         "      };\n" +
         "\n" +
-        "      google.maps.event.addDomListener(window, 'load', thisMap.initialize);\n" +
+        "      google.maps.event.addDomListener(window, 'load', mapContainer.initialize);\n" +
         "\n" +
         "    </script>\n" +
         "  </head>\n" +
@@ -799,8 +904,9 @@ public class WebMap extends AndroidViewComponent {
   @SimpleFunction(description = "Specifies whether users will be able to add markers by clicking " +
       "on the map. True will make the map listen for clicks. False will unbind the listener.")
   //TODO (ajcolter) is there a better name that could be used?
+  //TODO (ajcolter) make a map property instead?
   public void AllowUserMarkers(boolean allowUserMarkers) {
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().addListenersForMarkers(" +
+    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().addListenersForMarkers(" +
         allowUserMarkers + ")");
   }
 
@@ -813,51 +919,83 @@ public class WebMap extends AndroidViewComponent {
   @SimpleFunction(description = "The center of the map is marked with a circle. The show parameter " +
       "specifies if the circle is painted on the map (true) or not (false).")
   public void ShowCenter(boolean show) {
-    webview.loadUrl("javascript:thisMap.showCenter(" + show + ")");
+    webview.loadUrl("javascript:mapContainer.showCenter(" + show + ")");
   }
 
   @SimpleFunction(description = "Re-set the center of the map and pan to it. The coordinates are " +
       "in the format (lat, lng), for instance a text block containing '25, 25'.")
   public void SetCenter(String coords) {
-    webview.loadUrl("javascript:thisMap.setCenter('" + coords + "')");
+    webview.loadUrl("javascript:mapContainer.setCenter('" + coords + "')");
+  }
+
+  public YailList GetCenter() {
+    //TODO (aj) write handler to capture this value
+    webview.loadUrl("javascript:mapContainer.getCenter()");
+    return new YailList();
+  }
+
+  public String GetGoogleMapObject() {
+    //TODO (aj) write handler to capture this value
+    webview.loadUrl("javascript:mapContainer.getGoogleMapObject()");
+    return "";
   }
 
   @SimpleFunction(description = "Sets the Zoom to the specified level by the zoom parameter.")
   public void SetZoom(int zoom) {
     if (zoom >= 0 && zoom < 20)
-      webview.loadUrl("javascript:thisMap.setZoom(" + zoom + ")");
+      webview.loadUrl("javascript:mapContainer.setZoom(" + zoom + ")");
     else
       form.dispatchErrorOccurredEvent(form, "AddMarker", ErrorMessages.ERROR_INVALID_ZOOM_LEVEL);
+  }
+
+  @SimpleFunction(description = "Gets the Zoom level by the zoom parameter.")
+  public int GetZoom() {
+    webview.loadUrl("javascript:mapContainer.getZoom()");
+    //TODO (ajcolter) how do I get the return value here??
+    return 0;
   }
 
   @SimpleFunction(description = "Shows all the markers currently available on the map, " +
       "even those that might have been hidden by developer or user action.")
   public void ShowMarkers(boolean show) {
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().showMarkers(" + show + ")");
+    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().showMarkers(" + show + ")");
   }
 
-  @SimpleFunction(description = "Deletes all markers currently on the map. This is a full delete." +
-      " To simply hide markers from view please use the HideMarkers block.")
-  public void DeleteMarkersFromMap() {
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().deleteMarkers()");
-  }
+//  @SimpleFunction(description = "Deletes all markers currently on the map. This is a full delete." +
+//      " To simply hide markers from view please use the HideMarkers block.")
+//  public void DeleteMarkersFromMap() {
+//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().deleteMarkers()");
+//  }
 
   @SimpleFunction(description = "Places a marker in a location by providing its address instead " +
       "of coordinates. An example could be '32 Vassar St. Cambridge MA'")
   public void GeoLocate(String address) {
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().geolocate('" + address + "')");
+    //TODO (aj) why doesn't this return the geolocation results? how is a map/marker going to use it? is it useful?
+    webview.loadUrl("javascript:mapContainer.getGeolocationFromAddress('" + address + "')");
   }
 
   @SimpleFunction(description = "Adds a marker to the map. To create a Marker use the Marker " +
       "block, also available in WebMap.")
-  public void AddMarkerToMap(YailList marker) {
-    String [] markerData = marker.toStringArray();
-    String javaScriptCommand = "javascript:thisMap.getMarkerFunctions().addAIMarker(thisMap" +
-        ".getMarkerFunctions().locationFromLatLngCoords(" + markerData[0] + ", " + markerData[1] +
-        "),'" + markerData[2] + "', '" + markerData[3] + "')";
-
-    webview.loadUrl(javaScriptCommand);
+  public void CreateMarkerObjectOnMap(String location, String title) {
+    //TODO (aj) create more of these blocks to take locations that are also google.maps.latlng instances, etc? or is
+    // string just simpler?
+    webview.loadUrl("javascript:mapContainer.createMarker("+location+ "," + title + ")");
   }
+//  public void AddMarkerToMap(YailList marker) {
+//    String [] markerData = marker.toStringArray();
+//    String javaScriptCommand = "javascript:mapContainer.getMarkerFunctions().addAIMarker(mapContainer" +
+//        ".getMarkerFunctions().locationFromLatLngCoords(" + markerData[0] + ", " + markerData[1] +
+//        "),'" + markerData[2] + "', '" + markerData[3] + "')";
+//
+//    webview.loadUrl(javaScriptCommand);
+//  }
+  @SimpleFunction(description = "Creates a marker object; adds it to the map if map is not null.")
+  public void CreateMarkerObject(String map, long latitude, long longitude, String title, String icon, boolean
+      clickable, boolean visible) {
+    webview.loadUrl("javascript:markerContainer(" +map+ "," + latitude + "," + longitude + "," + title + "," +
+        icon + "," + clickable + "," +visible+")");
+  }
+
 
   @SimpleFunction(description = "Creates and returns a Marker but does not directly add it to the" +
       " map. To add it to the map you can use the AddMarkerToMap block. You can also store this " +
@@ -885,53 +1023,60 @@ public class WebMap extends AndroidViewComponent {
     return YailList.makeList(new ArrayList()); // Return an empty list if we cannot create a marker
   }
 
-  @SimpleFunction(description = "Shows a particular marker on the map by its id.")
-  public void ShowMarker(YailList marker, boolean show) {
-    String markerId = idForMarker(marker);
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().showMarker('" + markerId+ "', " +
-        show + ")");
-  }
+//TODO (aj) fix this -- make a new one based on removing the marker object from the map?
+//  @SimpleFunction(description = "Shows a particular marker on the map by its id.")
+//  public void ShowMarker(YailList marker, boolean show) {
+//    String markerId = idForMarker(marker);
+//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().showMarker('" + markerId+ "', " +
+//        show + ")");
+//  }
+
 
   private String idForMarker(YailList marker) {
-    String markerId = "(" + marker.getString(0) + ", " + marker.getString(1) + ")";
-    return markerId;
+    //TODO (aj) still using yaillists for markers? probably want to make the marker class right?
+    //String markerId = webview.loadUrl("javascript:"+marker+".prototype.getId();");//"(" + marker.getString(0) + ",
+    // " + marker.getString(1) +
+    // ")";
+    //return markerId;
+    return "Location";
   }
 
   @SimpleFunction(description = "Pan the map towards a particular marker on the map by its id.")
   public void PanToMarker(YailList marker) {
     String markerId = idForMarker(marker);
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().panToMarker('" + markerId+ "')");
+    webview.loadUrl("javascript:mapContainer.panToMarker('" + markerId+ "')");
   }
 
-  @SimpleFunction(description = "A new marker with all properties unchanged except for the title of" +
-      " the particular marker passed as a parameter. This title could be used as" +
-      " a more human readable id to show and select markers in a ListView or ListPicker.")
-  public YailList SetMarkerTitle(YailList marker, String title) {
-    String markerId = idForMarker(marker);
-    //create a new Marker object from the previous one. We cannot simply set position 3 to the
-    // new title because YailList does not implement the set method.
-    String markerValues [] = marker.toStringArray();
-    markerValues[2] = title;
-    YailList newMarker = YailList.makeList(markerValues);
-    String javaScriptCommand = "javascript:thisMap.getMarkerFunctions().setMarkerTitle('" +
-        markerId + "', '" + title + "')";
-    Log.d(LOG_TAG, "JS command for SetMarkerTitle is: " + javaScriptCommand);
-    Log.d(LOG_TAG, "markerId for SetMarkerTitle is: " + markerId);
-    webview.loadUrl(javaScriptCommand);
+//  @SimpleFunction(description = "A new marker with all properties unchanged except for the title of" +
+//      " the particular marker passed as a parameter. This title could be used as" +
+//      " a more human readable id to show and select markers in a ListView or ListPicker.")
+//  public YailList SetMarkerTitle(YailList marker, String title) {
+//    String markerId = idForMarker(marker);
+//    //create a new Marker object from the previous one. We cannot simply set position 3 to the
+//    // new title because YailList does not implement the set method.
+//    String markerValues [] = marker.toStringArray();
+//    markerValues[2] = title;
+//    YailList newMarker = YailList.makeList(markerValues);
+//    String javaScriptCommand = "javascript:mapContainer.getMarkerFunctions().setMarkerTitle('" +
+//        markerId + "', '" + title + "')";
+//    Log.d(LOG_TAG, "JS command for SetMarkerTitle is: " + javaScriptCommand);
+//    Log.d(LOG_TAG, "markerId for SetMarkerTitle is: " + markerId);
+//    webview.loadUrl(javaScriptCommand);
+//
+//    return newMarker;
+//  }
 
-    return newMarker;
-  }
+//  @SimpleFunction(description = "Get the title of a particular marker.")
+//  public String GetMarkerTitle(YailList marker) {
+//    return marker.getString(2);
+//  }
 
-  @SimpleFunction(description = "Get the title of a particular marker.")
-  public String GetMarkerTitle(YailList marker) {
-    return marker.getString(2);
-  }
+//  @SimpleFunction(description = "Get the InfoWindow content of a particular marker.")
+//  public String GetMarkerInfoWindowContent(YailList marker) {
+//    return marker.getString(3);
+//  }
 
-  @SimpleFunction(description = "Get the InfoWindow content of a particular marker.")
-  public String GetMarkerInfoWindowContent(YailList marker) {
-    return marker.getString(3);
-  }
-
+  //TODO (aj) update these functions based on how we use the marker object
   @SimpleFunction(description = "Get the Latitude of a particular marker.")
   public double GetMarkerLatitude(YailList marker) {
     return Double.valueOf(marker.getString(0)).doubleValue();
@@ -948,8 +1093,8 @@ public class WebMap extends AndroidViewComponent {
       "can be persisted with an additional component, such as TinyDB. This function triggers the " +
       "event MarkersFromMapReceived when the list is received. Several lists of markers could be " +
       "stored in the Screen and sent to the map with the block AddMarkersFromList.")
-  public void RequestListOfMarkersFromMap() { //may make more sense to name this GetListOfMarkers
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().storeMarkers()");
+  public void GetAllMarkersFromMap() { //may make more sense to name this GetListOfMarkers
+    webview.loadUrl("javascript:mapContainer.getAllMarkers()");
   }
 
   @SimpleFunction(description = "Visualizes a list of lists of markers in the map. This block " +
@@ -959,8 +1104,7 @@ public class WebMap extends AndroidViewComponent {
   public void AddMarkersFromList(YailList list) {
     //TODO (ajcolter) make sure it is a List of Lists and convert it to JSON
     String markersJSON = createStringifiedJSONFromYailList(list);
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().addMarkersFromList('" + markersJSON +
-        "')");
+    webview.loadUrl("javascript:mapContainer.addMarkersFromList('" + markersJSON + "')");
   }
 
   /**
@@ -990,32 +1134,32 @@ public class WebMap extends AndroidViewComponent {
     return json.toString();
   }
 
-  @SimpleFunction(description = "Creates an InfoWindow for a particular marker that can be " +
-      "displayed on particular events (in combination with the open and close infoWindow blocks.)")
-  public YailList CreateInfoWindow(YailList marker, String content) {
-    String markerId = idForMarker(marker);
-    //create a new Marker object from the previous one. We cannot simply set position 3 to the
-    // new title because YailList does not implement the set method.
-    String markerValues [] = marker.toStringArray();
-    markerValues[3] = content;
-    YailList newMarker = YailList.makeList(markerValues);
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().createInfoWindow('" +
-        markerId + "', '" + content + "')");
+//  @SimpleFunction(description = "Creates an InfoWindow for a particular marker that can be " +
+//      "displayed on particular events (in combination with the open and close infoWindow blocks.)")
+//  public YailList CreateInfoWindow(YailList marker, String content) {
+//    String markerId = idForMarker(marker);
+//    //create a new Marker object from the previous one. We cannot simply set position 3 to the
+//    // new title because YailList does not implement the set method.
+//    String markerValues [] = marker.toStringArray();
+//    markerValues[3] = content;
+//    YailList newMarker = YailList.makeList(markerValues);
+//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().createInfoWindow('" +
+//        markerId + "', '" + content + "')");
+//
+//    return newMarker;
+//  }
 
-    return newMarker;
-  }
-
-  @SimpleFunction(description = "Open an InfoWindow for a particular marker.")
-  public void OpenInfoWindow(YailList marker) {
-    String markerId = idForMarker(marker);
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().openInfoWindow('" + markerId + "')");
-  }
-
-  @SimpleFunction(description = "Close an InfoWindow for a particular marker.")
-  public void CloseInfoWindow(YailList marker) {
-    String markerId = idForMarker(marker);
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().closeInfoWindow('" + markerId+ "')");
-  }
+//  @SimpleFunction(description = "Open an InfoWindow for a particular marker.")
+//  public void OpenInfoWindow(YailList marker) {
+//    String markerId = idForMarker(marker);
+//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().openInfoWindow('" + markerId + "')");
+//  }
+//
+//  @SimpleFunction(description = "Close an InfoWindow for a particular marker.")
+//  public void CloseInfoWindow(YailList marker) {
+//    String markerId = idForMarker(marker);
+//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().closeInfoWindow('" + markerId+ "')");
+//  }
 
   @Override
   public View getView() {
@@ -1042,15 +1186,15 @@ public class WebMap extends AndroidViewComponent {
     super.Height(height);
   }
 
-  /**
-   * Event triggered by a marker being clicked on the map.
-   * @param marker a stringified representation of the marked being clicked
-   */
-  @SimpleEvent(description = "Event triggered by a marker being clicked on the map.")
-  public void MarkerClicked(final String marker) {
-      YailList markerYail = createMarkerFromStringifiedJson(marker);
-      EventDispatcher.dispatchEvent(this, "MarkerClicked", markerYail);
-  }
+//  /**
+//   * Event triggered by a marker being clicked on the map.
+//   * @param marker a stringified representation of the marked being clicked
+//   */
+//  @SimpleEvent(description = "Event triggered by a marker being clicked on the map.")
+//  public void MarkerClicked(final String marker) {
+//      YailList markerYail = createMarkerFromStringifiedJson(marker);
+//      EventDispatcher.dispatchEvent(this, "MarkerClicked", markerYail);
+//  }
 
   private YailList createMarkerFromStringifiedJson(String jsonMarker){
     YailList marker = YailList.makeList(new ArrayList());
@@ -1070,19 +1214,20 @@ public class WebMap extends AndroidViewComponent {
     }
     return marker;
   }
-  /**
-   * Event triggered by a marker being doubled clicked on the map. NOTE that a MarkerClicked event
-   * will always be triggered at the same time that a marker is being double clicked.
-   * @param marker a stringified representation of the marked being double clicked
-   */
-  @SimpleEvent(description = "Event triggered by a marker being doubled clicked on the map. NOTE " +
-      "that a MarkerClicked event will always be triggered at the same time that a marker is " +
-      "being double clicked.")
-  //TODO (ajcolter) make a work around for this. It's silly to have a clicked and a double clicked event triggered at the same time.
-  public void MarkerDoubleClicked(final String marker) {
-    YailList markerYail = createMarkerFromStringifiedJson(marker);
-    EventDispatcher.dispatchEvent(this, "MarkerDoubleClicked", markerYail);
-  }
+
+//  /**
+//   * Event triggered by a marker being doubled clicked on the map. NOTE that a MarkerClicked event
+//   * will always be triggered at the same time that a marker is being double clicked.
+//   * @param marker a stringified representation of the marked being double clicked
+//   */
+//  @SimpleEvent(description = "Event triggered by a marker being doubled clicked on the map. NOTE " +
+//      "that a MarkerClicked event will always be triggered at the same time that a marker is " +
+//      "being double clicked.")
+//  //TODO (ajcolter) make a work around for this. It's silly to have a clicked and a double clicked event triggered at the same time.
+//  public void MarkerDoubleClicked(final String marker) {
+//    YailList markerYail = createMarkerFromStringifiedJson(marker);
+//    EventDispatcher.dispatchEvent(this, "MarkerDoubleClicked", markerYail);
+//  }
 
   @SimpleEvent(description = "Event triggered after a request made by the " +
       "RequestListOfMarkersFromMap block. It returns a List of Lists with the information of all " +
@@ -1096,23 +1241,24 @@ public class WebMap extends AndroidViewComponent {
       "effect.")
   public void MapIsReady() {
     SetCenter(initialLatLng);   // This should really be done when the map is loaded
+    //TODO (aj) can this happen on the JS side? Can it pull the gps info from the phone?
     EventDispatcher.dispatchEvent(this, "MapIsReady");
   }
 
-  @SimpleEvent(description = "A user has added a marker by clicking on the map. This event will " +
-      "trigger only if users are allowed to add markers by using the block AllowUserMarkers. " +
-      "The marker is returned so that actions can be applied to that particular marker.")
-  public void UserMarkerAdded(final String marker) {
-    YailList markerYail = createMarkerFromStringifiedJson(marker);
-    EventDispatcher.dispatchEvent(this, "UserMarkerAdded", markerYail);
-  }
+//  @SimpleEvent(description = "A user has added a marker by clicking on the map. This event will " +
+//      "trigger only if users are allowed to add markers by using the block AllowUserMarkers. " +
+//      "The marker is returned so that actions can be applied to that particular marker.")
+//  public void UserMarkerAdded(final String marker) {
+//    YailList markerYail = createMarkerFromStringifiedJson(marker);
+//    EventDispatcher.dispatchEvent(this, "UserMarkerAdded", markerYail);
+//  }
 
-  @SimpleEvent(description = "A marker has been added to the map by using the Geolocate block. " +
-      "The marker is returned so that actions can be applied to that particular marker.")
-  public void GeolocationMarkerAdded(final String marker, final String formattedAddress) {
-    YailList markerYail = createMarkerFromStringifiedJson(marker);
-    EventDispatcher.dispatchEvent(this, "GeolocationMarkerAdded", markerYail, formattedAddress);
-  }
+//  @SimpleEvent(description = "A marker has been added to the map by using the Geolocate block. " +
+//      "The marker is returned so that actions can be applied to that particular marker.")
+//  public void GeolocationMarkerAdded(final String marker, final String formattedAddress) {
+//    YailList markerYail = createMarkerFromStringifiedJson(marker);
+//    EventDispatcher.dispatchEvent(this, "GeolocationMarkerAdded", markerYail, formattedAddress);
+//  }
 
   /**
    * Allows the setting of properties to be monitored from the javascript
@@ -1136,60 +1282,60 @@ public class WebMap extends AndroidViewComponent {
       webViewForm.dispatchErrorOccurredEvent(webViewForm, "dispatchError", errorNumber);
     }
 
-    @JavascriptInterface
-    public void handleMarker(final String jsonMarker) {
-      Log.d(LOG_TAG, "Marker clicked: " + jsonMarker);
-      webViewForm.runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-          MarkerClicked(jsonMarker);
-        }
-      });
-    }
+//    @JavascriptInterface
+//    public void handleMarker(final String jsonMarker) {
+//      Log.d(LOG_TAG, "Marker clicked: " + jsonMarker);
+//      webViewForm.runOnUiThread(new Runnable() {
+//        @Override
+//        public void run() {
+//          //MarkerClicked(jsonMarker);
+//        }
+//      });
+//    }
+//
+//    @JavascriptInterface
+//    public void handleDoubleMarker(final String jsonMarker) {
+//      Log.d(LOG_TAG, "Marker DOUBLED clicked: " + jsonMarker);
+//      webViewForm.runOnUiThread(new Runnable() {
+//        @Override
+//        public void run() {
+//          //MarkerDoubleClicked(jsonMarker);
+//        }
+//      });
+//    }
 
-    @JavascriptInterface
-    public void handleDoubleMarker(final String jsonMarker) {
-      Log.d(LOG_TAG, "Marker DOUBLED clicked: " + jsonMarker);
-      webViewForm.runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-          MarkerDoubleClicked(jsonMarker);
-        }
-      });
-    }
-
-    /**
-     * Receives a JSON object with marker data from the map and converts each marker to a List
-     * that will be added to a YailList of markers. The result is a list of lists with marker data.
-     * @param markersList the stringified JSON object coming from the map.
-     */
-    @JavascriptInterface
-    public void storeMarkers(final String markersList) {
-      try {
-        JSONArray markersJSON = new JSONArray(markersList);
-        List<YailList> markerValues = new ArrayList<YailList>();
-
-        for(int i = 0; i < markersJSON.length(); i++){
-          List<String> aMarker = new ArrayList<String>();
-          aMarker.add(markersJSON.getJSONObject(i).getString("lat"));
-          aMarker.add(markersJSON.getJSONObject(i).getString("lng"));
-          aMarker.add(markersJSON.getJSONObject(i).getString("title"));
-          aMarker.add(markersJSON.getJSONObject(i).getString("content"));
-          markerValues.add(YailList.makeList(aMarker));
-        }
-
-        final YailList markersYailList = YailList.makeList(markerValues);
-        webViewForm.runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            MarkersFromMapReceived(markersYailList);
-          }
-        });
-      } catch (JSONException e) {
-        webViewForm.dispatchErrorOccurredEvent(form, "storeMarkers",
-            ErrorMessages.ERROR_PARSING_MARKERS_LIST);
-      }
-    }
+//    /**
+//     * Receives a JSON object with marker data from the map and converts each marker to a List
+//     * that will be added to a YailList of markers. The result is a list of lists with marker data.
+//     * @param markersList the stringified JSON object coming from the map.
+//     */
+//    @JavascriptInterface
+//    public void storeMarkers(final String markersList) {
+//      try {
+//        JSONArray markersJSON = new JSONArray(markersList);
+//        List<YailList> markerValues = new ArrayList<YailList>();
+//
+//        for(int i = 0; i < markersJSON.length(); i++){
+//          List<String> aMarker = new ArrayList<String>();
+//          aMarker.add(markersJSON.getJSONObject(i).getString("lat"));
+//          aMarker.add(markersJSON.getJSONObject(i).getString("lng"));
+//          aMarker.add(markersJSON.getJSONObject(i).getString("title"));
+//          aMarker.add(markersJSON.getJSONObject(i).getString("content"));
+//          markerValues.add(YailList.makeList(aMarker));
+//        }
+//
+//        final YailList markersYailList = YailList.makeList(markerValues);
+//        webViewForm.runOnUiThread(new Runnable() {
+//          @Override
+//          public void run() {
+//            MarkersFromMapReceived(markersYailList);
+//          }
+//        });
+//      } catch (JSONException e) {
+//        webViewForm.dispatchErrorOccurredEvent(form, "storeMarkers",
+//            ErrorMessages.ERROR_PARSING_MARKERS_LIST);
+//      }
+//    }
 
     @JavascriptInterface
     public void mapIsReady() {
@@ -1202,25 +1348,25 @@ public class WebMap extends AndroidViewComponent {
       });
     }
 
-    @JavascriptInterface
-    public void userMarkerAdded(final String markerJson) {
-      webViewForm.runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-          UserMarkerAdded(markerJson);
-        }
-      });
-    }
+//    @JavascriptInterface
+//    public void userMarkerAdded(final String markerJson) {
+//      webViewForm.runOnUiThread(new Runnable() {
+//        @Override
+//        public void run() {
+//          UserMarkerAdded(markerJson);
+//        }
+//      });
+//    }
 
-    @JavascriptInterface
-    public void geolocationMarkerAdded(final String markerJson, final String formattedAddress) {
-      webViewForm.runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-          GeolocationMarkerAdded(markerJson, formattedAddress);
-        }
-      });
-    }
+//    @JavascriptInterface
+//    public void geolocationMarkerAdded(final String markerJson, final String formattedAddress) {
+//      webViewForm.runOnUiThread(new Runnable() {
+//        @Override
+//        public void run() {
+//          GeolocationMarkerAdded(markerJson, formattedAddress);
+//        }
+//      });
+//    }
 
   }
 }

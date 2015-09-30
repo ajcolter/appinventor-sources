@@ -57,4 +57,6 @@ public class Marker {
   //  return this.id;
   //}
 
+  //create marker, remove/delete marker, find marker in list. probably in map class.
+
 }
