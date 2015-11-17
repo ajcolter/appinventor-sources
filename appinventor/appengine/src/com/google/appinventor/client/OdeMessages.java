@@ -3268,6 +3268,8 @@ public interface OdeMessages extends Messages {
   @Description("")
   String WebViewStringProperties();
 
+  //maps
+
   @DefaultMessage("GoogleMapsKey")
   @Description("")
   String WebMapGoogleMapsKeyProperties();
@@ -3275,6 +3277,11 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("InitialLocationLatLng")
   @Description("")
   String WebMapInitialLocationLatLngProperties();
+
+  @DefaultMessage("GetZoom")
+  @Description("")
+  String GetZoomMethods();
+
 
   //Params
   @DefaultMessage("xAccel")
