@@ -249,8 +249,8 @@ public class WebMap extends AndroidViewComponent {
         "       * This map script is an abstraction of a number of functions from the Google maps\n" +
         "       * JavaScript API to be used within a customized WebView as an App Inventor Component.\n" +
         "       *\n" +
-        "       * It contains two main objects: mapContainer and mapMarkers.\n" +
-        "       * mapContainer initializes the map and makes use of mapMarkers, which simply encapsulates all\n" +
+        "       * It contains two main objects: thisMap and mapMarkers.\n" +
+        "       * thisMap initializes the map and makes use of mapMarkers, which simply encapsulates all\n" +
         "       * functions related to markers placed in the map. It is possible to create other utility\n" +
         "       * objects with other functionality in the SDK such as drawing, layers, or services.\n" +
         "       */\n" +
@@ -263,7 +263,7 @@ public class WebMap extends AndroidViewComponent {
         "      \n" +
         "        var map;\n" +
         "        var centerMarker;\n" +
-        "        var markerFunctions;\n" +
+        "        //var markerFunctions;\n" +
         "        var allMarkers = {};\n" +
         "        var zoom = initialZoom || 6;\n" +
         "        var showingCenter = showCenter || true;\n" +
@@ -279,7 +279,7 @@ public class WebMap extends AndroidViewComponent {
         "          //showCenter(showingCenter);\n" +
         "\n" +
         "          //Initialize marker functions object, exposes the marker functions.\n" +
-        "          //markerFunctions = markerObject(mapContainer);\n" +
+        "          //markerFunctions = markerObject(thisMap);\n" +
         "          \n" +
         "        };\n" +
         "\n" +
@@ -291,6 +291,7 @@ public class WebMap extends AndroidViewComponent {
         "          centerMarker.setIcon({path: google.maps.SymbolPath.CIRCLE,\n" +
         "                scale: 6})\n" +
         "          //TODO: include a pan to center?\n" +
+        "          panToMarker(centerMarker);\n" +
         "          return centerMarker;\n" +
         "        };\n" +
         "\n" +
@@ -307,12 +308,14 @@ public class WebMap extends AndroidViewComponent {
         "          showingCenter = show;\n" +
         "        };\n" +
         "\n" +
-        "        var getCenter = function() { return centerMarker; }\n" +
+        "        var getCenter = function() { \n" +
+        "          return androidObject.sendCenterMarkerToAndroid(centerMarker.createJsonMarker()); \n" +
+        "        };\n" +
         "\n" +
         "        var getGoogleMapObject = function() { return map; };\n" +
         "\n" +
         "        //not sure why we need this getter; what is the use case for needing these functions?\n" +
-        "        var getMarkerFunctions = function() { return markerFunctions; };\n" +
+        "        //var getMarkerFunctions = function() { return markerFunctions; };\n" +
         "\n" +
         "        var getAllMarkers = function() { return allMarkers; };\n" +
         "\n" +
@@ -443,6 +446,7 @@ public class WebMap extends AndroidViewComponent {
         "        };\n" +
         "\n" +
         "        var addMarkersFromList = function(markerList) {\n" +
+        "          //TODO link this in to create marker if not already a marker object?\n" +
         "          for (i = 0; i < markerList.length; i++) {\n" +
         "            if (!getMarker(markerList[i].prototype.getPosition().toString())) {\n" +
         "              addMarker(markerList[i]);\n" +
@@ -549,14 +553,14 @@ public class WebMap extends AndroidViewComponent {
         "            map.panTo(markerToPanTo.getPosition());\n" +
         "        };\n" +
         "\n" +
-        "        //API for the mapContainer object: main entry object for functionality\n" +
+        "        //API for the thisMap object: main entry object for functionality\n" +
         "        return {\n" +
         "          initialize: initialize,\n" +
         "          showCenter: showCenter,\n" +
         "          setCenter: setCenter,\n" +
         "          getCenter: getCenter,\n" +
         "          getGoogleMapObject: getGoogleMapObject, // For Debugging (not used from the component).\n" +
-        "          getMarkerFunctions: getMarkerFunctions,\n" +
+        "          //getMarkerFunctions: getMarkerFunctions,\n" +
         "          getAllMarkers: getAllMarkers,\n" +
         "          getMarker: getMarker,\n" +
         "          createMarker: createMarker,\n" +
@@ -574,7 +578,7 @@ public class WebMap extends AndroidViewComponent {
         "          getMap: getMap\n" +
         "        }\n" +
         "      //TODO (jos) Magic numbers: the center of the map will come from Android\n" +
-        "      } (42.3598, -71.0921, true, 2); //Auto initialize the mapContainer object\n" +
+        "      } (42.3598, -71.0921, true, 2); //Auto initialize the thisMap object\n" +
         "\n" +
         "\n" +
         "      function markerContainer(map, lat, lng, title, icon, clickable, visible) {\n" +
@@ -690,7 +694,7 @@ public class WebMap extends AndroidViewComponent {
         "       * This function returns an object with certain methods exposed as its API. The functionality\n" +
         "       * of this object is related to management of markers in the map.\n" +
         "       * @returns an Object with methods related to Marker management.\n" +
-        "       * @param map the map to associate the markers with. mapContainer object from above.\n" +
+        "       * @param map the map to associate the markers with. thisMap object from above.\n" +
         "       */\n" +
         "      // var markerObject = function(map) {\n" +
         "\n" +
@@ -723,19 +727,33 @@ public class WebMap extends AndroidViewComponent {
         "      //     var markerJson = createJsonMarkerFromId(markerId);\n" +
         "      //   }\n" +
         "\n" +
-        "      //   function createJsonMarkerFromId(markerId){\n" +
-        "      //     var currentMarker = map.getMarker(markerId);\n" +
-        "      //     var markerObject = {\n" +
-        "      //       lat: currentMarker.getPosition().lat(),\n" +
-        "      //       lng: currentMarker.getPosition().lng(),\n" +
-        "      //       title: currentMarker.title || '',\n" +
-        "      //       info: (currentMarker.info && currentMarker.info.content) ?\n" +
-        "      //           currentMarker.info.content : ''\n" +
-        "      //     }\n" +
-        "      //     var markerJson = JSON.stringify(markerObject);\n" +
+        "        function createJsonMarker(){\n" +
+        "          var currentMarker = this.marker;\n" +
+        "          var markerObject = {\n" +
+        "            lat: currentMarker.getPosition().lat(),\n" +
+        "            lng: currentMarker.getPosition().lng(),\n" +
+        "            title: currentMarker.title || '',\n" +
+        "            info: (currentMarker.info && currentMarker.info.content) ?\n" +
+        "                currentMarker.info.content : ''\n" +
+        "          }\n" +
+        "          var markerJson = JSON.stringify(markerObject);\n" +
         "\n" +
-        "      //     return markerJson;\n" +
-        "      //   }\n" +
+        "          return markerJson;\n" +
+        "        }\n" +
+        "\n" +
+        "        // function createJsonMarkerFromId(markerId){\n" +
+        "        //   var currentMarker = map.getMarker(markerId);\n" +
+        "        //   var markerObject = {\n" +
+        "        //     lat: currentMarker.getPosition().lat(),\n" +
+        "        //     lng: currentMarker.getPosition().lng(),\n" +
+        "        //     title: currentMarker.title || '',\n" +
+        "        //     info: (currentMarker.info && currentMarker.info.content) ?\n" +
+        "        //         currentMarker.info.content : ''\n" +
+        "        //   }\n" +
+        "        //   var markerJson = JSON.stringify(markerObject);\n" +
+        "\n" +
+        "        //   return markerJson;\n" +
+        "        // }\n" +
         "\n" +
         "      //   var addListenersForMarkers = function (add) {\n" +
         "      //     if (add){\n" +
@@ -841,6 +859,12 @@ public class WebMap extends AndroidViewComponent {
         "            AppInventorMap.dispatchError(errorNumber);\n" +
         "        },\n" +
         "\n" +
+        "        sendCenterMarkerToAndroid: function(jsonMarker) {\n" +
+        "          if (typeof AppInventorMap !== 'undefined')\n" +
+        "            AppInventorMap.handleMarker(jsonMarker);\n" +
+        "\n" +
+        "        },\n" +
+        "\n" +
         "        /**\n" +
         "         * Function to call to the Android side after a user has clicked on a marker\n" +
         "         */\n" +
@@ -891,8 +915,8 @@ public class WebMap extends AndroidViewComponent {
         "  </body>\n" +
         "</html>\n";
 
-    webview.loadUrl("file:///sdcard/AppInventor/assets/map.html");
-//    webview.loadDataWithBaseURL(null, map, "text/html", "utf-8", null);
+//    webview.loadUrl("file:///sdcard/AppInventor/assets/map.html");
+    webview.loadDataWithBaseURL(null, map, "text/html", "utf-8", null);
 
   }
 
@@ -928,10 +952,10 @@ public class WebMap extends AndroidViewComponent {
     webview.loadUrl("javascript:mapContainer.setCenter('" + coords + "')");
   }
 
-  public YailList GetCenter() {
+  public void GetCenter() {
     //TODO (aj) write handler to capture this value
     webview.loadUrl("javascript:mapContainer.getCenter()");
-    return new YailList();
+//    return new YailList();
   }
 
   public String GetGoogleMapObject() {
@@ -1280,6 +1304,12 @@ public class WebMap extends AndroidViewComponent {
     public void dispatchError(int errorNumber) {
       Log.d(LOG_TAG, "Error triggered on map with errorNumber: " + errorNumber);
       webViewForm.dispatchErrorOccurredEvent(webViewForm, "dispatchError", errorNumber);
+    }
+
+    @JavascriptInterface
+    public YailList getCenterMarker(final String jsonMarker) {
+      Log.d(LOG_TAG, "Center marker: " + jsonMarker);
+      return createMarkerFromStringifiedJson(jsonMarker);
     }
 
 //    @JavascriptInterface
