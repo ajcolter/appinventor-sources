@@ -28,7 +28,7 @@ goog.require('Blockly.TypeBlock');
  * Block Colors Hues (See blockly.js for Saturation and Value - fixed for
  * all blocks)
  */
-Blockly.ComponentBlock.COLOUR_EVENT = Blockly.CONTROL_CATEGORY_HUE;
+Blockly.ComponentBlock.COLOUR_EVENT = Blockly.EVENT_CATEGORY_HUE; //Blockly.CONTROL_CATEGORY_HUE;
 Blockly.ComponentBlock.COLOUR_METHOD = Blockly.PROCEDURE_CATEGORY_HUE;
 Blockly.ComponentBlock.COLOUR_GET = [67, 153, 112];
 Blockly.ComponentBlock.COLOUR_SET = [38, 102, 67];
