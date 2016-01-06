@@ -1342,7 +1342,7 @@ public class Ode implements EntryPoint {
     Grid messageGrid = new Grid(2, 1);
     messageGrid.getCellFormatter().setAlignment(0,
         0,
-        HasHorizontalAlignment.ALIGN_JUSTIFY,
+        HasHorizontalAlignment.ALIGN_LEFT,
         HasVerticalAlignment.ALIGN_MIDDLE);
     messageGrid.getCellFormatter().setAlignment(1,
         0,
@@ -1352,7 +1352,7 @@ public class Ode implements EntryPoint {
     Label messageChunk1 = new HTML(MESSAGES.createNoProjectsDialogMessage1());
     
     messageChunk1.setWidth("23em");
-    Label messageChunk2 = new Label(MESSAGES.createNoprojectsDialogMessage2());
+    Label messageChunk2 = new HTML(MESSAGES.createNoProjectsDialogMessage2());
 
     // Add the elements to the grids and DialogBox.
     messageGrid.setWidget(0, 0, messageChunk1);
