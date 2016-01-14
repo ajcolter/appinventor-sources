@@ -906,7 +906,7 @@ Blockly.ReplMgr.startRepl = function(already, emulator, usb) {
     if (!already) {
         if (window.parent.ReplState.state != this.rsState.IDLE) // If we are not idle, we don't do anything!
             return;
-        if (emulator || usb) {         // If we are talking to the emulator, don't use rendezvou server
+        if (emulator || usb) {         // If we are talking to the emulator, don't use rendezvous server
             this.startAdbDevice(rs, usb);
             rs.state = this.rsState.WAITING; // Wait for the emulator to start
             rs.replcode = "emulator";          // Must match code in Companion Source
@@ -928,8 +928,10 @@ Blockly.ReplMgr.startRepl = function(already, emulator, usb) {
         rs.count = 0;
         rs.dialog = new Blockly.Util.Dialog(Blockly.Msg.REPL_CONNECT_TO_COMPANION, this.makeDialogMessage(rs.replcode), Blockly.Msg.REPL_CANCEL, null, 1, function() {
             rs.dialog.hide();
+            rs.connecting = new Blockly.Util.Dialog("Connecting to companion", null, null, null, 1, null);
             rs.state = Blockly.ReplMgr.rsState.IDLE; // We're punting
             rs.connection = null;
+            rs.connecting.hide();
             window.parent.BlocklyPanel_indicateDisconnect();
         });
         this.getFromRendezvous();
