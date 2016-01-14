@@ -1319,7 +1319,7 @@ public class Ode implements EntryPoint {
    */
   public DialogBox createNoProjectsDialog(boolean showDialog) {
     // Create the UI elements of the DialogBox
-    final DialogBox dialogBox = new DialogBox(true);
+    final DialogBox dialogBox = new DialogBox(true, false); // DialogBox(autohide, modal)
     dialogBox.setStylePrimaryName("ode-DialogBox");
     dialogBox.setText(MESSAGES.createNoProjectsDialogText());
 
@@ -1408,15 +1408,13 @@ public class Ode implements EntryPoint {
    * @param force Bypass the check to see if they have dimissed this version
    */
   private void createWelcomeDialog(boolean force) {
-    //Commenting out for testing of new dialog design --
-//    if (!shouldShowWelcomeDialog() && !force) {
-//      openProjectsTab();
-//      return;
-//    }
+    if (!shouldShowWelcomeDialog() && !force) {
+      openProjectsTab();
+      return;
+    }
     // Create the UI elements of the DialogBox
     final DialogBox dialogBox = new DialogBox(false, true); // DialogBox(autohide, modal)
     dialogBox.setStylePrimaryName("ode-DialogBox");
-//    dialogBox.setText(MESSAGES.createWelcomeDialogText());
     dialogBox.setHeight(splashConfig.height + "px");
     dialogBox.setWidth(splashConfig.width + "px");
     dialogBox.setGlassEnabled(true);
