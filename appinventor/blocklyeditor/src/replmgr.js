@@ -928,12 +928,11 @@ Blockly.ReplMgr.startRepl = function(already, emulator, usb) {
         rs.count = 0;
         rs.dialog = new Blockly.Util.Dialog(Blockly.Msg.REPL_CONNECT_TO_COMPANION, this.makeDialogMessage(rs.replcode), Blockly.Msg.REPL_CANCEL, null, 1, function() {
             rs.dialog.hide();
-            rs.connecting = new Blockly.Util.Dialog("Connecting to companion", null, null, null, 1, null);
             rs.state = Blockly.ReplMgr.rsState.IDLE; // We're punting
             rs.connection = null;
-            rs.connecting.hide();
             window.parent.BlocklyPanel_indicateDisconnect();
         });
+
         this.getFromRendezvous();
     } else {
         if (window.parent.ReplState.state == this.rsState.RENDEZVOUS) {
