@@ -54,7 +54,7 @@ public class ProjectToolbar extends Toolbar {
   }
 
   public void createFirstNewProject() {
-    new NewYoungAndroidProjectWizard().center();
+    new NewYoungAndroidProjectWizard(null).center();
   }
 
   private static class NewAction implements Command {
