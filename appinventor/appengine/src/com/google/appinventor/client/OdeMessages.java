@@ -489,7 +489,7 @@ public interface OdeMessages extends Messages {
   String deleteKeystoreMenuItem();
 
   //Connect
-  @DefaultMessage("Run")
+  @DefaultMessage("Test")
   @Description("Label of the button leading to Connect related cascade items")
   String connectTabName();
 
