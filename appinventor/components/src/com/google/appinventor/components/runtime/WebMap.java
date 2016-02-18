@@ -972,33 +972,6 @@ public class WebMap extends AndroidViewComponent {
     return YailList.makeList(new ArrayList()); // Return an empty list if we cannot create a marker
   }
 
-  @SimpleFunction(description = "Creates and returns a Polygon. The paths object expects a set of latitude-longitude " +
-      "pairs. The range for latitude is [-90, 90], and the range for longitude is [-180, 180]. The stroke color is " +
-      "the desired for the stroke between vertices. The stroke opacity is the opacity of the line between vertices. " +
-      "The stroke weight is the thickness of the line between vertices. The fill color is the color that will be used" +
-      " to fill the polygon. The fill opacity is the opacity of the fill in the polygon.")
-  public YailList Polygon(YailList paths, int strokeColor, long strokeOpacity, long strokeWeight, int fillColor,
-                          long fillOpacity) {
-
-    ArrayList<String> values = new ArrayList<String>();
-//    ArrayList<String> pathsCopy = new ArrayList<String>();
-    //comma separate all of the values
-//    for (int i = 0; i< paths.length(); i++) {
-//      pathsCopy.add(paths.getString(i) + ",");
-//    }
-//    Log.i("aubrey", pathsCopy.toString());
-//    values.add(YailList.makeList(pathsCopy) + "");
-    values.add(paths + "");
-    values.add(strokeColor + "");
-    values.add(strokeOpacity + "");
-    values.add(strokeWeight + "");
-    values.add(strokeWeight + "");
-    values.add(fillColor + "");
-    values.add(fillOpacity + "");
-    Log.i("aubrey values", values.toString());
-    return YailList.makeList(values);
-  }
-
   @SimpleFunction(description = "Shows a particular marker on the map by its id.")
   public void ShowMarker(YailList marker, boolean show) {
     String markerId = idForMarker(marker);

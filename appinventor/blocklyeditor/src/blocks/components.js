@@ -612,10 +612,7 @@ Blockly.Blocks.component_set_get = {
       //var title = this.inputList[0].titleRow[0];
       //title.setText(this.instanceName + '.');
       this.componentDropDown.setValue(this.instanceName);
-<<<<<<< HEAD
       Blockly.Blocks.Utilities.renameCollapsed(this, 0);
-=======
->>>>>>> Broken polygon maps code
     }
   },
   typeblock : function(){
