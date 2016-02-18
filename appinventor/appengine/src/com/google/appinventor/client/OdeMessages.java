@@ -5725,6 +5725,7 @@ public interface OdeMessages extends Messages {
   @Description("")
   String XMLTextDecodeMethods();
 
+<<<<<<< HEAD
   @DefaultMessage("ExtraKey and ExtraValue are deprecated and will not be supported. " +
       "Please use the new Extras property in Blocks.\n")
   @Description("")
@@ -5765,6 +5766,10 @@ public interface OdeMessages extends Messages {
   String firebaseExperimentalWarning();
 
   //Maps
+=======
+  //Maps
+
+>>>>>>> e54197bef02e5ae7ff6c42076e0ec7957d50c7a0
   @DefaultMessage("GoogleMapsKey")
   @Description("")
   String GoogleMapsKeyProperties();

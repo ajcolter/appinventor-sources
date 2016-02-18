@@ -10,6 +10,7 @@ import com.google.appinventor.client.Images;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
+<<<<<<< HEAD
 import com.google.appinventor.client.editor.simple.components.MockBall;
 import com.google.appinventor.client.editor.simple.components.MockButton;
 import com.google.appinventor.client.editor.simple.components.MockCanvas;
@@ -40,6 +41,9 @@ import com.google.appinventor.client.editor.simple.components.MockWebMap;
 import com.google.appinventor.client.editor.simple.components.MockWebViewer;
 import com.google.appinventor.client.editor.simple.components.MockSpinner;
 
+=======
+import com.google.appinventor.client.editor.simple.components.*;
+>>>>>>> e54197bef02e5ae7ff6c42076e0ec7957d50c7a0
 import com.google.common.collect.Maps;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Image;
