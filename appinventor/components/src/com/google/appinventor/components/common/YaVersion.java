@@ -323,7 +323,6 @@ public class YaVersion {
   // For YOUNG_ANDROID_VERSION 123:
   // - TEXTTOSPEECH_COMPONENT_VERSION was incremented to 3
   // For YOUNG_ANDROID_VERSION 124:
-<<<<<<< HEAD
   // - FORM_COMPONENT_VERSION was incremented to 15.
   // For YOUNG_ANDROID_VERSION 125:
   // - LISTVIEW_COMPONENT_VERSION was incremented to 5
@@ -381,11 +380,7 @@ public class YaVersion {
 
   public static final int YOUNG_ANDROID_VERSION = 149;
   // - WEBMAP_VERSION was incremented to 1
-=======
-  // - WEBMAP_VERSION was incremented to 1
 
-  public static final int YOUNG_ANDROID_VERSION = 124;
->>>>>>> e54197bef02e5ae7ff6c42076e0ec7957d50c7a0
 
   // ............................... Blocks Language Version Number ...............................
 

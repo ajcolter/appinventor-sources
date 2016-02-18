@@ -766,17 +766,10 @@ public class WebMap extends AndroidViewComponent {
         "      var androidObject = {\n" +
         "\n" +
         "        // CONSTANTS FOR ERRORS, As defined on the Android side.\n" +
-<<<<<<< HEAD
         "        ERROR_ILLEGAL_COORDS_FORMAT: 3102,\n" +
         "        ERROR_PARSING_MARKERS_LIST: 3103,\n" +
         "        ERROR_INVALID_MARKER: 3104,\n" +
         "        ERROR_NO_GEOLOCATION_RESULTS: 3106,\n" +
-=======
-        "        ERROR_ILLEGAL_COORDS_FORMAT: 2802,\n" +
-        "        ERROR_PARSING_MARKERS_LIST: 2803,\n" +
-        "        ERROR_INVALID_MARKER: 2804,\n" +
-        "        ERROR_NO_GEOLOCATION_RESULTS: 2806,\n" +
->>>>>>> e54197bef02e5ae7ff6c42076e0ec7957d50c7a0
         "\n" +
         "        /**\n" +
         "         * Function to dispatch errors to Android through the AppInventorMap interface. If this\n" +
@@ -979,15 +972,13 @@ public class WebMap extends AndroidViewComponent {
     return YailList.makeList(new ArrayList()); // Return an empty list if we cannot create a marker
   }
 
-<<<<<<< HEAD
   @SimpleFunction(description = "Shows a particular marker on the map by its id.")
   public void ShowMarker(YailList marker, boolean show) {
     String markerId = idForMarker(marker);
     webview.loadUrl("javascript:thisMap.getMarkerFunctions().showMarker('" + markerId+ "', " +
         show + ")");
   }
-=======
->>>>>>> e54197bef02e5ae7ff6c42076e0ec7957d50c7a0
+
 //TODO (aj) fix this -- make a new one based on removing the marker object from the map?
 //  @SimpleFunction(description = "Shows a particular marker on the map by its id.")
 //  public void ShowMarker(YailList marker, boolean show) {
