@@ -241,8 +241,8 @@ public class TranslationComponentProperty {
     map.put("ItemBackgroundColor", MESSAGES.ItemBackgroundColorProperties());
 
     // ========== WebMap
-    map.put("GoogleMapsKey", MESSAGES.WebMapGoogleMapsKeyProperties());
-    map.put("InitialLocationLatLng", MESSAGES.WebMapInitialLocationLatLngProperties());
+    map.put("GoogleMapsKey", MESSAGES.GoogleMapsKeyProperties());
+    map.put("InitialLocationLatLng", MESSAGES.InitialLocationLatLngProperties());
 
     return map;
   }

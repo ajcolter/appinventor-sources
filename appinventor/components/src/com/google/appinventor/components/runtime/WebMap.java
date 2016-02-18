@@ -581,251 +581,176 @@ public class WebMap extends AndroidViewComponent {
         "      } (42.3598, -71.0921, true, 2); //Auto initialize the thisMap object\n" +
         "\n" +
         "\n" +
-        "      function markerContainer(map, lat, lng, title, icon, clickable, visible) {\n" +
-        "        \n" +
-        "        this.map = map;\n" +
-        "        this.icon = icon || null;\n" +
-        "        this.clickable = clickable || true;\n" +
-        "        this.visible = visible || true;\n" +
-        "\n" +
-        "        var markerOptions = {\n" +
-        "            map: this.map,\n" +
-        "            position: {lat: lat, lng: lng},\n" +
-        "            title: title,\n" +
-        "            icon: this.icon,\n" +
-        "            clickable: this.clickable,\n" +
-        "            visible: this.visible\n" +
-        "          };\n" +
-        "\n" +
-        "        this.marker = new google.maps.Marker(markerOptions);\n" +
-        "        this.id = this.marker.getPosition().toString();\n" +
-        "        return this.marker;\n" +
-        "      }\n" +
-        "\n" +
-        "      markerContainer.prototype.deleteMarker = function() {\n" +
-        "        this.marker.setMap(null);\n" +
-        "        this.id = null;\n" +
-        "\n" +
-        "        delete this.marker; //does this work??\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.equals = function(otherMarker) {\n" +
-        "        return this === otherMarker;\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.getId = function() {\n" +
-        "        return this.id;\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.getIcon = function() {\n" +
-        "        return this.marker.getIcon();\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.getMap = function() {\n" +
-        "        return this.marker.getMap();\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.getTitle = function() {\n" +
-        "        return this.marker.getTitle();\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.getClickable = function() {\n" +
-        "        return this.marker.getClickable();\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.getPosition = function() {\n" +
-        "        return this.marker.getPosition();\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.getVisible = function() {\n" +
-        "        return this.marker.getVisible();\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.getMarkerObject = function() {\n" +
-        "        return this.marker;\n" +
-        "      }\n" +
-        "\n" +
-        "      markerContainer.prototype.setIcon = function(icon) {\n" +
-        "        this.marker.setIcon(icon);\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.setMap = function(map) {\n" +
-        "        this.marker.setMap(map);\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.setTitle = function(title) {\n" +
-        "        this.marker.setTitle(title);\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.setClickable = function(clickable) {\n" +
-        "        this.marker.setClickable(clickable);\n" +
-        "      }\n" +
-        "\n" +
-        "      markerContainer.prototype.setPosition = function(lat, lng) {\n" +
-        "        //TODO convert to LatLng object\n" +
-        "        this.marker.setPosition({lat: lat, lng: lng});\n" +
-        "      };\n" +
-        "\n" +
-        "      markerContainer.prototype.setVisible = function(visible) {\n" +
-        "        this.marker.setVisible(visible);\n" +
-        "      };\n" +
-        "\n" +
-        "        // return {\n" +
-        "        //   deleteMarker: deleteMarker,\n" +
-        "        //   equals: equals,\n" +
-        "        //   getId: getId,\n" +
-        "        //   getIcon: getIcon,\n" +
-        "        //   getMap: getMap,\n" +
-        "        //   getTitle: getTitle,\n" +
-        "        //   getClickable: getClickable,\n" +
-        "        //   getPosition: getPosition,\n" +
-        "        //   getVisible: getVisible,\n" +
-        "        //   getMarkerObject: getMarkerObject,\n" +
-        "        //   setIcon: setIcon,\n" +
-        "        //   setMap: setMap,\n" +
-        "        //   setTitle: setTitle,\n" +
-        "        //   setClickable: setClickable,\n" +
-        "        //   setPosition: setPosition,\n" +
-        "        //   setVisible: setVisible\n" +
-        "        // }\n" +
-        "\n" +
-        "\n" +
         "      /**\n" +
         "       * This function returns an object with certain methods exposed as its API. The functionality\n" +
         "       * of this object is related to management of markers in the map.\n" +
         "       * @returns an Object with methods related to Marker management.\n" +
         "       * @param map the map to associate the markers with. thisMap object from above.\n" +
         "       */\n" +
-        "      // var markerObject = function(map) {\n" +
+        "      function markerContainer(map, lat, lng, title, icon, clickable, visible) {\n" +
         "\n" +
-        "      //   if (!map) throw new Error('No map available'); \n" +
-        "      //   //if there is no map, the marker should just disappear/shouldn't exist. Don't think we need to throw an error...\n" +
+        "        var marker;\n" +
+        "        var id;\n" +
         "\n" +
-        "      //   var getId = function(marker) {\n" +
-        "      //     return marker.getPosition().toString();\n" +
-        "      //   };\n" +
+        "        function initialize() {\n" +
+        "          var markerOptions = {\n" +
+        "              map: map,\n" +
+        "              position: {lat: lat, lng: lng},\n" +
+        "              title: title,\n" +
+        "              icon: icon,\n" +
+        "              clickable: clickable,\n" +
+        "              visible: visible\n" +
+        "            };\n" +
         "\n" +
-        "      //   var equals = function(otherMarker) {\n" +
-        "      //     if (otherMarker == null) return false;\n" +
-        "      //     if (otherMarker instanceof AIMarker){\n" +
-        "      //       //Equality is based on position - two markers on the same position are the same marker\n" +
-        "      //       return this.marker.getPosition().toString() ===\n" +
-        "      //           otherMarker.marker.getPosition().toString();\n" +
-        "      //     }\n" +
-        "      //     return false;\n" +
-        "\n" +
-        "      //   };\n" +
-        "\n" +
-        "      //   // Closure needed to associate each markerId with its click handler function\n" +
-        "      //   function doubleClicked(markerId, doubleClick) {\n" +
-        "      //     return function(){\n" +
-        "      //       doubleClickHandler(markerId, doubleClick);\n" +
-        "      //     }\n" +
-        "      //   }\n" +
-        "\n" +
-        "      //   function doubleClickHandler(markerId, doubleClick) {\n" +
-        "      //     var markerJson = createJsonMarkerFromId(markerId);\n" +
-        "      //   }\n" +
-        "\n" +
-        "        function createJsonMarker(){\n" +
-        "          var currentMarker = this.marker;\n" +
-        "          var markerObject = {\n" +
-        "            lat: currentMarker.getPosition().lat(),\n" +
-        "            lng: currentMarker.getPosition().lng(),\n" +
-        "            title: currentMarker.title || '',\n" +
-        "            info: (currentMarker.info && currentMarker.info.content) ?\n" +
-        "                currentMarker.info.content : ''\n" +
-        "          }\n" +
-        "          var markerJson = JSON.stringify(markerObject);\n" +
-        "\n" +
-        "          return markerJson;\n" +
+        "          marker = new google.maps.Marker(markerOptions);\n" +
+        "          id = marker.getPosition().toString();\n" +
+        "          return marker;\n" +
         "        }\n" +
         "\n" +
-        "        // function createJsonMarkerFromId(markerId){\n" +
-        "        //   var currentMarker = map.getMarker(markerId);\n" +
-        "        //   var markerObject = {\n" +
-        "        //     lat: currentMarker.getPosition().lat(),\n" +
-        "        //     lng: currentMarker.getPosition().lng(),\n" +
-        "        //     title: currentMarker.title || '',\n" +
-        "        //     info: (currentMarker.info && currentMarker.info.content) ?\n" +
-        "        //         currentMarker.info.content : ''\n" +
-        "        //   }\n" +
-        "        //   var markerJson = JSON.stringify(markerObject);\n" +
+        "      //this exists in the map container\n" +
+        "      // markerContainer.deleteMarker = function() {\n" +
+        "      //   this.marker.setMap(null);\n" +
+        "      //   this.id = null;\n" +
         "\n" +
-        "        //   return markerJson;\n" +
-        "        // }\n" +
-        "\n" +
-        "      //   var addListenersForMarkers = function (add) {\n" +
-        "      //     if (add){\n" +
-        "      //       google.maps.event.addListener(map, 'click', function(event) {\n" +
-        "      //         var aiMarker = addMarker(event.latLng);\n" +
-        "      //         var markerJson = createJsonMarkerFromId(aiMarker.prototype.getPosition().toString());\n" +
-        "      //       });\n" +
-        "      //     } \n" +
-        "      //     else\n" +
-        "      //       google.maps.event.clearListeners(map,'click');\n" +
-        "      //   };\n" +
-        "\n" +
-        "      //   var showMarker = function(markerId, show) {\n" +
-        "      //     var markerToShow = map.getMarker(markerId);\n" +
-        "      //     if (show) {\n" +
-        "      //       if (markerToShow){\n" +
-        "      //         markerToShow.setMap(map);\n" +
-        "      //       }\n" +
-        "      //     } else {\n" +
-        "      //       if (markerToShow) {\n" +
-        "      //         markerToShow.setMap(null);\n" +
-        "      //       }\n" +
-        "      //     }\n" +
-        "      //   };\n" +
-        "\n" +
-        "      //   var deleteMarker = function(markerId) {\n" +
-        "      //     showMarker(markerId, false);\n" +
-        "      //     map.deleteMarker(markerId);\n" +
-        "      //   }\n" +
-        "\n" +
-        "      //   // InfoWindow functions\n" +
-        "      //   // TODO this is circular, needs to use \"this\" marker object\n" +
-        "      //   var createInfoWindow = function(markerId, content) {\n" +
-        "      //     var infoWindow = new google.maps.InfoWindow({\n" +
-        "      //       content: content\n" +
-        "      //     });\n" +
-        "      //     var marker = map.getMarker(markerId);\n" +
-        "      //     if (marker)\n" +
-        "      //       marker.info = infoWindow;\n" +
-        "      //   };\n" +
-        "\n" +
-        "      //   var openInfoWindow = function(markerId){\n" +
-        "      //     var marker = map.getMarker(markerId);\n" +
-        "      //     if (marker && marker.info)\n" +
-        "      //       marker.info.open(map, marker);\n" +
-        "      //   };\n" +
-        "\n" +
-        "      //   var closeInfoWindow = function(markerId){\n" +
-        "      //     var marker = map.getMarker(markerId);\n" +
-        "      //     if (marker && marker.info)\n" +
-        "      //       marker.info.close();\n" +
-        "      //   };\n" +
-        "\n" +
-        "      //   var setMarkerTitle = function(markerId, title) {\n" +
-        "      //     var marker = map.getMarker(markerId);\n" +
-        "      //     if (marker)\n" +
-        "      //       marker.setTitle(title);\n" +
-        "      //   };\n" +
-        "\n" +
-        "      //   //API for the mapMarkers object\n" +
-        "      //   //MUST ADD FUNCTION HANDLES HERE\n" +
-        "      //   return {\n" +
-        "      //     addListenersForMarkers: addListenersForMarkers,\n" +
-        "      //     showMarker: showMarker,\n" +
-        "      //     deleteMarker: deleteMarker,\n" +
-        "      //     createInfoWindow: createInfoWindow,\n" +
-        "      //     openInfoWindow: openInfoWindow,\n" +
-        "      //     closeInfoWindow: closeInfoWindow,\n" +
-        "      //     setMarkerTitle: setMarkerTitle,\n" +
-        "      //   };\n" +
-        "\n" +
+        "      //   delete this.marker; //does this work??\n" +
         "      // };\n" +
+        "\n" +
+        "      //TODO should equality be if their locations/IDs are the same, instead of the same object?\n" +
+        "      var equals = function(otherMarker) {\n" +
+        "        return marker === otherMarker;\n" +
+        "      };\n" +
+        "\n" +
+        "      var getId = function() {\n" +
+        "        return id;\n" +
+        "      };\n" +
+        "\n" +
+        "      var getIcon = function() {\n" +
+        "        return marker.icon;\n" +
+        "      };\n" +
+        "\n" +
+        "      var getMap = function() {\n" +
+        "        return marker.map;\n" +
+        "      };\n" +
+        "\n" +
+        "      var getTitle = function() {\n" +
+        "        return marker.title;\n" +
+        "      };\n" +
+        "\n" +
+        "      var getClickable = function() {\n" +
+        "        return marker.clickable;\n" +
+        "      };\n" +
+        "\n" +
+        "      var getPosition = function() {\n" +
+        "        return marker.position;\n" +
+        "      };\n" +
+        "\n" +
+        "      var getLatitude = function() {\n" +
+        "        return marker.position.lat();\n" +
+        "      };\n" +
+        "\n" +
+        "      var getLongitude = function() {\n" +
+        "        return marker.position.lng();\n" +
+        "      }\n" +
+        "\n" +
+        "      var getVisible = function() {\n" +
+        "        return marker.visible;\n" +
+        "      };\n" +
+        "\n" +
+        "      var getMarkerObject = function() {\n" +
+        "        return marker;\n" +
+        "      }\n" +
+        "\n" +
+        "      var setIcon = function(icon) {\n" +
+        "        marker.setIcon(icon);\n" +
+        "      };\n" +
+        "\n" +
+        "      var setMap = function(map) {\n" +
+        "        marker.setMap(map);\n" +
+        "      };\n" +
+        "\n" +
+        "      var setTitle = function(title) {\n" +
+        "        marker.setTitle(title);\n" +
+        "      };\n" +
+        "\n" +
+        "      var setClickable = function(clickable) {\n" +
+        "        marker.setClickable(clickable);\n" +
+        "      }\n" +
+        "\n" +
+        "      var setPosition = function(lat, lng) {\n" +
+        "        marker.setPosition({lat: lat, lng: lng});\n" +
+        "      };\n" +
+        "\n" +
+        "      var setVisible = function(visible) {\n" +
+        "        marker.setVisible(visible);\n" +
+        "      };\n" +
+        "\n" +
+        "      var createJsonMarker = function(){\n" +
+        "        var markerObject = {\n" +
+        "          lat: marker.getPosition().lat(),\n" +
+        "          lng: marker.getPosition().lng(),\n" +
+        "          title: marker.title || '',\n" +
+        "          info: (marker.info && marker.info.content) ?\n" +
+        "              marker.info.content : ''\n" +
+        "        }\n" +
+        "        var markerJson = JSON.stringify(markerObject);\n" +
+        "\n" +
+        "        return markerJson;\n" +
+        "      };\n" +
+        "\n" +
+        "      //TODO Does this work? I don't understand the callback...\n" +
+        "      // var addListenersForMarkers = function (add) {\n" +
+        "      //   if (add){\n" +
+        "      //     google.maps.event.addListener(marker.map, 'click', function(event) {\n" +
+        "      //       var markerJson = createJsonMarker();\n" +
+        "      //     });\n" +
+        "      //   } \n" +
+        "      //   else\n" +
+        "      //     google.maps.event.clearListeners(map,'click');\n" +
+        "      // };\n" +
+        "\n" +
+        "      // InfoWindow functions\n" +
+        "      var createInfoWindow = function(content) {\n" +
+        "        var infoWindow = new google.maps.InfoWindow({\n" +
+        "          content: content\n" +
+        "        });\n" +
+        "        marker.info = infoWindow;\n" +
+        "      };\n" +
+        "\n" +
+        "      var openInfoWindow = function(){\n" +
+        "        if (marker && marker.info)\n" +
+        "          marker.info.open(marker.map, marker);\n" +
+        "      };\n" +
+        "\n" +
+        "      var closeInfoWindow = function(){\n" +
+        "        if (marker && marker.info)\n" +
+        "          marker.info.close();\n" +
+        "      };\n" +
+        "\n" +
+        "      return {\n" +
+        "        // deleteMarker: deleteMarker,\n" +
+        "        initialize: initialize,\n" +
+        "        equals: equals,\n" +
+        "        getId: getId,\n" +
+        "        getIcon: getIcon,\n" +
+        "        getMap: getMap,\n" +
+        "        getTitle: getTitle,\n" +
+        "        getClickable: getClickable,\n" +
+        "        getPosition: getPosition,\n" +
+        "        getLatitude: getLatitude,\n" +
+        "        getLongitude: getLongitude,\n" +
+        "        getVisible: getVisible,\n" +
+        "        getMarkerObject: getMarkerObject,\n" +
+        "        setIcon: setIcon,\n" +
+        "        setMap: setMap,\n" +
+        "        setTitle: setTitle,\n" +
+        "        setClickable: setClickable,\n" +
+        "        setPosition: setPosition,\n" +
+        "        setVisible: setVisible,\n" +
+        "        createJsonMarker: createJsonMarker,\n" +
+        "        createInfoWindow: createInfoWindow,\n" +
+        "        openInfoWindow: openInfoWindow,\n" +
+        "        closeInfoWindow: closeInfoWindow\n" +
+        "      }\n" +
         "\n" +
         "      /**\n" +
         "       * An object to hold functions that communicate directly to Android through the JS interface.\n" +

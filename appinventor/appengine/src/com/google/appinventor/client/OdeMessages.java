@@ -3268,21 +3268,6 @@ public interface OdeMessages extends Messages {
   @Description("")
   String WebViewStringProperties();
 
-  //maps
-
-  @DefaultMessage("GoogleMapsKey")
-  @Description("")
-  String WebMapGoogleMapsKeyProperties();
-
-  @DefaultMessage("InitialLocationLatLng")
-  @Description("")
-  String WebMapInitialLocationLatLngProperties();
-
-  @DefaultMessage("GetZoom")
-  @Description("")
-  String GetZoomMethods();
-
-
   //Params
   @DefaultMessage("xAccel")
   @Description("")
@@ -5779,6 +5764,7 @@ public interface OdeMessages extends Messages {
   @Description("")
   String firebaseExperimentalWarning();
 
+  //Maps
   @DefaultMessage("GoogleMapsKey")
   @Description("")
   String GoogleMapsKeyProperties();
@@ -5839,6 +5825,14 @@ public interface OdeMessages extends Messages {
   @Description("")
   String CreateInfoWindowMethods();
 
+  @DefaultMessage("CreateMarkerObject")
+  @Description("")
+  String CreateMarkerObjectMethods();
+
+  @DefaultMessage("CreateMarkerObjectOnMap")
+  @Description("")
+  String CreateMarkerObjectOnMapMethods();
+
   @DefaultMessage("DeleteMarkersFromMap")
   @Description("")
   String DeleteMarkersFromMapMethods();
@@ -5847,9 +5841,9 @@ public interface OdeMessages extends Messages {
   @Description("")
   String GeoLocateMethods();
 
-  @DefaultMessage("GetMarkerInfoWindowContent")
+  @DefaultMessage("GetAllMarkersFromMap")
   @Description("")
-  String GetMarkerInfoWindowContentMethods();
+  String GetAllMarkersFromMapMethods();
 
   @DefaultMessage("GetMarkerLatitude")
   @Description("")
@@ -5863,6 +5857,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String GetMarkerTitleMethods();
 
+  @DefaultMessage("GetZoom")
+  @Description("")
+  String GetZoomMethods();
+
   @DefaultMessage("Marker")
   @Description("")
   String MarkerMethods();
@@ -5874,10 +5872,6 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("PanToMarker")
   @Description("")
   String PanToMarkerMethods();
-
-  @DefaultMessage("Polygon")
-  @Description("")
-  String PolygonMethods();
 
   @DefaultMessage("RequestListOfMarkersFromMap")
   @Description("")
