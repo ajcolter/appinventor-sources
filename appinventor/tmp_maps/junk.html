@@ -1,0 +1,38 @@
+<script>
+
+var mapContainer = function(centerLat, centerLng, showCenter, initialZoom) {
+      
+        var map;
+        var centerMarker;
+        //var markerFunctions;
+        var allMarkers = {};
+        var zoom = initialZoom || 6;
+        var showingCenter = showCenter || true;
+        var centerCoords = new google.maps.LatLng(centerLat, centerLng)
+        function initialize() {
+          var mapOptions = {
+            zoom: zoom,
+            center: centerCoords,
+            disableDoubleClickZoom: true
+          };
+          map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+          //centerMarker = setCenter(centerCoords);
+          //showCenter(showingCenter);
+
+          //Initialize marker functions object, exposes the marker functions.
+          //markerFunctions = markerObject(thisMap);
+          
+        };
+        var setCenter = function(location){
+          if (centerMarker) 
+            centerMarker.setMap(null); // Delete any existing center first.
+
+          centerMarker = createMarker(location, 'Map Center');
+          centerMarker.setIcon({path: google.maps.SymbolPath.CIRCLE,
+                scale: 6})
+          //TODO: include a pan to center?
+          panToMarker(centerMarker);
+          return centerMarker;
+        };
+
+</script>
