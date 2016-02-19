@@ -188,7 +188,7 @@ public final class ErrorMessages {
   public static final int ERROR_BAD_PERCENT = 2801;
 
   // 2901-2999 are reserved for FIRST Tech Challenge.
-  
+
   // Image errors
   public static final int ERROR_IMAGE_CANNOT_ROTATE = 3001;
 

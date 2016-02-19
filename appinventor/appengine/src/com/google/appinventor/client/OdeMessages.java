@@ -5773,117 +5773,77 @@ public interface OdeMessages extends Messages {
   @Description("")
   String InitialLocationLatLngProperties();
 
-  @DefaultMessage("GeolocationMarkerAdded")
-  @Description("")
-  String GeolocationMarkerAddedEvents();
+//  @DefaultMessage("GeolocationMarkerAdded")
+//  @Description("")
+//  String GeolocationMarkerAddedEvents();
 
-  @DefaultMessage("MapIsReady")
-  @Description("")
-  String MapIsReadyEvents();
+//  @DefaultMessage("MapIsReady")
+//  @Description("")
+//  String MapIsReadyEvents();
 
-  @DefaultMessage("MarkerClicked")
-  @Description("")
-  String MarkerClickedEvents();
+//  @DefaultMessage("MarkerClicked")
+//  @Description("")
+//  String MarkerClickedEvents();
+//
+//  @DefaultMessage("MarkerDoubleClicked")
+//  @Description("")
+//  String MarkerDoubleClickedEvents();
+//
+//  @DefaultMessage("MarkersFromMapReceived")
+//  @Description("")
+//  String MarkersFromMapReceivedEvents();
+//
+//  @DefaultMessage("UserMarkerAdded")
+//  @Description("")
+//  String UserMarkerAddedEvents();
 
-  @DefaultMessage("MarkerDoubleClicked")
-  @Description("")
-  String MarkerDoubleClickedEvents();
+//  @DefaultMessage("AllowUserMarkers")
+//  @Description("")
+//  String AllowUserMarkersMethods();
 
-  @DefaultMessage("MarkersFromMapReceived")
-  @Description("")
-  String MarkersFromMapReceivedEvents();
+//  @DefaultMessage("CloseInfoWindow")
+//  @Description("")
+//  String CloseInfoWindowMethods();
+//
+//  @DefaultMessage("CreateInfoWindow")
+//  @Description("")
+//  String CreateInfoWindowMethods();
 
-  @DefaultMessage("PolygonAdded")
-  @Description("")
-  String PolygonAddedEvents();
+//  @DefaultMessage("GeoLocate")
+//  @Description("")
+//  String GeoLocateMethods();
 
-  @DefaultMessage("UserMarkerAdded")
-  @Description("")
-  String UserMarkerAddedEvents();
+//  @DefaultMessage("GetAllMarkersFromMap")
+//  @Description("")
+//  String GetAllMarkersFromMapMethods();
 
-  @DefaultMessage("AddMarkerToMap")
-  @Description("")
-  String AddMarkerToMapMethods();
+//  @DefaultMessage("GetMarkerLatitude")
+//  @Description("")
+//  String GetMarkerLatitudeMethods();
+//
+//  @DefaultMessage("GetMarkerLongitude")
+//  @Description("")
+//  String GetMarkerLongitudeMethods();
+//
+//  @DefaultMessage("GetMarkerTitle")
+//  @Description("")
+//  String GetMarkerTitleMethods();
 
-  @DefaultMessage("AddMarkersFromList")
-  @Description("")
-  String AddMarkersFromListMethods();
+//  @DefaultMessage("GetZoom")
+//  @Description("")
+//  String GetZoomMethods();
 
-  @DefaultMessage("AddPolygonToMap")
-  @Description("")
-  String AddPolygonToMapMethods();
-
-  @DefaultMessage("AllowUserMarkers")
-  @Description("")
-  String AllowUserMarkersMethods();
-
-  @DefaultMessage("CloseInfoWindow")
-  @Description("")
-  String CloseInfoWindowMethods();
-
-  @DefaultMessage("CreateInfoWindow")
-  @Description("")
-  String CreateInfoWindowMethods();
-
-  @DefaultMessage("CreateMarkerObject")
-  @Description("")
-  String CreateMarkerObjectMethods();
-
-  @DefaultMessage("CreateMarkerObjectOnMap")
-  @Description("")
-  String CreateMarkerObjectOnMapMethods();
-
-  @DefaultMessage("DeleteMarkersFromMap")
-  @Description("")
-  String DeleteMarkersFromMapMethods();
-
-  @DefaultMessage("GeoLocate")
-  @Description("")
-  String GeoLocateMethods();
-
-  @DefaultMessage("GetAllMarkersFromMap")
-  @Description("")
-  String GetAllMarkersFromMapMethods();
-
-  @DefaultMessage("GetMarkerLatitude")
-  @Description("")
-  String GetMarkerLatitudeMethods();
-
-  @DefaultMessage("GetMarkerLongitude")
-  @Description("")
-  String GetMarkerLongitudeMethods();
-
-  @DefaultMessage("GetMarkerTitle")
-  @Description("")
-  String GetMarkerTitleMethods();
-
-  @DefaultMessage("GetZoom")
-  @Description("")
-  String GetZoomMethods();
-
-  @DefaultMessage("Marker")
-  @Description("")
-  String MarkerMethods();
-
-  @DefaultMessage("OpenInfoWindow")
-  @Description("")
-  String OpenInfoWindowMethods();
+//  @DefaultMessage("OpenInfoWindow")
+//  @Description("")
+//  String OpenInfoWindowMethods();
 
   @DefaultMessage("PanToMarker")
   @Description("")
   String PanToMarkerMethods();
 
-  @DefaultMessage("RequestListOfMarkersFromMap")
-  @Description("")
-  String RequestListOfMarkersFromMapMethods();
-
   @DefaultMessage("SetCenter")
   @Description("")
   String SetCenterMethods();
-
-  @DefaultMessage("SetMarkerTitle")
-  @Description("")
-  String SetMarkerTitleMethods();
 
   @DefaultMessage("SetZoom")
   @Description("")
@@ -5893,12 +5853,20 @@ public interface OdeMessages extends Messages {
   @Description("")
   String ShowCenterMethods();
 
-  @DefaultMessage("ShowMarker")
-  @Description("")
-  String ShowMarkerMethods();
+//  @DefaultMessage("ShowMarker")
+//  @Description("")
+//  String ShowMarkerMethods();
 
   @DefaultMessage("ShowMarkers")
   @Description("")
   String ShowMarkersMethods();
+
+  @DefaultMessage("CreateMarker")
+  @Description("")
+  String CreateMarkerMethods();
+
+  @DefaultMessage("DeleteAllMarkers")
+  @Description("")
+  String DeleteAllMarkersMethods();
 
 }

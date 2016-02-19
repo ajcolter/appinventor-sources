@@ -232,146 +232,140 @@ public class WebMap extends AndroidViewComponent {
     // the key when we get one. Coming up with a better way to do this would be good.
     String map = "<!DOCTYPE html>\n" +
         "<html>\n" +
-        "  <head>\n" +
-        "    <title>App Inventor - Map Component</title>\n" +
-        "    <meta name=\"viewport\" content=\"initial-scale=1.0, user-scalable=no\">\n" +
-        "    <meta charset=\"utf-8\">\n" +
-        "    <style>\n" +
-        "      html, body, #map-canvas {\n" +
-        "        height: 100%;\n" +
-        "        margin: 0px;\n" +
-        "        padding: 0px\n" +
+        "\n" +
+        "<head>\n" +
+        "  <title>App Inventor - Map Component</title>\n" +
+        "  <meta name=\"viewport\" content=\"initial-scale=1.0, user-scalable=no\">\n" +
+        "  <meta charset=\"utf-8\">\n" +
+        "  <style>\n" +
+        "    html,\n" +
+        "    body,\n" +
+        "    #map-canvas {\n" +
+        "      height: 100%;\n" +
+        "      margin: 0px;\n" +
+        "      padding: 0px\n" +
+        "    }\n" +
+        "  </style>\n" +
+        "  <script src=\"https://maps.googleapis.com/maps/api/js?v=3.exp\"></script>\n" +
+        "  <script>\n" +
+        "    /**\n" +
+        "     * This map script is an abstraction of a number of functions from the Google maps\n" +
+        "     * JavaScript API to be used within a customized WebView as an App Inventor Component.\n" +
+        "     *\n" +
+        "     * It contains two main objects: thisMap and mapMarkers.\n" +
+        "     * thisMap initializes the map and makes use of mapMarkers, which simply encapsulates all\n" +
+        "     * functions related to markers placed in the map. It is possible to create other utility\n" +
+        "     * objects with other functionality in the SDK such as drawing, layers, or services.\n" +
+        "     */\n" +
+        "\n" +
+        "    /**\n" +
+        "     * Main function for this script. Initializes the map and all the related functionality.\n" +
+        "     *\n" +
+        "     */\n" +
+        "    mapContainer = function(centerLat, centerLng, showCenter, initialZoom) {\n" +
+        "\n" +
+        "      var map;\n" +
+        "      var centerMarker;\n" +
+        "      var allMarkers = {};\n" +
+        "      var zoom = initialZoom || 2;\n" +
+        "      var showingCenter = showCenter || true;\n" +
+        "      var centerCoords = new google.maps.LatLng(centerLat, centerLng);\n" +
+        "\n" +
+        "      function initialize() {\n" +
+        "        var mapOptions = {\n" +
+        "          zoom: zoom,\n" +
+        "          center: centerCoords,\n" +
+        "          disableDoubleClickZoom: true\n" +
+        "        };\n" +
+        "        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);\n" +
+        "        centerMarker = setCenter(centerCoords);\n" +
+        "        showCenter(showingCenter);\n" +
+        "\n" +
         "      }\n" +
-        "    </style>\n" +
-        "    <script src=\"https://maps.googleapis.com/maps/api/js?v=3.exp\"></script>\n" +
-        "    <script>\n" +
-        "      /**\n" +
-        "       * This map script is an abstraction of a number of functions from the Google maps\n" +
-        "       * JavaScript API to be used within a customized WebView as an App Inventor Component.\n" +
-        "       *\n" +
-        "       * It contains two main objects: thisMap and mapMarkers.\n" +
-        "       * thisMap initializes the map and makes use of mapMarkers, which simply encapsulates all\n" +
-        "       * functions related to markers placed in the map. It is possible to create other utility\n" +
-        "       * objects with other functionality in the SDK such as drawing, layers, or services.\n" +
-        "       */\n" +
         "\n" +
-        "      /**\n" +
-        "       * Main function for this script. Initializes the map and all the related functionality.\n" +
-        "       *\n" +
-        "       */\n" +
-        "      var mapContainer = function(centerLat, centerLng, showCenter, initialZoom) {\n" +
-        "      \n" +
-        "        var map;\n" +
-        "        var centerMarker;\n" +
-        "        //var markerFunctions;\n" +
-        "        var allMarkers = {};\n" +
-        "        var zoom = initialZoom || 6;\n" +
-        "        var showingCenter = showCenter || true;\n" +
-        "        var centerCoords = new google.maps.LatLng(centerLat, centerLng)\n" +
-        "        function initialize() {\n" +
-        "          var mapOptions = {\n" +
-        "            zoom: zoom,\n" +
-        "            center: centerCoords,\n" +
-        "            disableDoubleClickZoom: true\n" +
-        "          };\n" +
-        "          map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);\n" +
-        "          //centerMarker = setCenter(centerCoords);\n" +
-        "          //showCenter(showingCenter);\n" +
+        "      var setCenter = function(location) {\n" +
+        "        if (centerMarker)\n" +
+        "          centerMarker.setMap(null); // Delete any existing center first.\n" +
         "\n" +
-        "          //Initialize marker functions object, exposes the marker functions.\n" +
-        "          //markerFunctions = markerObject(thisMap);\n" +
-        "          \n" +
-        "        };\n" +
-        "\n" +
-        "        var setCenter = function(location){\n" +
-        "          if (centerMarker) \n" +
-        "            centerMarker.setMap(null); // Delete any existing center first.\n" +
-        "\n" +
-        "          centerMarker = createMarker(location, 'Map Center');\n" +
-        "          centerMarker.setIcon({path: google.maps.SymbolPath.CIRCLE,\n" +
-        "                scale: 6})\n" +
+        "        centerMarker = createMarker(location, 'Map Center');\n" +
+        "        centerMarker.setIcon({\n" +
+        "            path: google.maps.SymbolPath.CIRCLE,\n" +
+        "            scale: 6\n" +
+        "          })\n" +
         "          //TODO: include a pan to center?\n" +
-        "          panToMarker(centerMarker);\n" +
-        "          return centerMarker;\n" +
-        "        };\n" +
+        "        panToMarker(centerMarker);\n" +
+        "        return centerMarker;\n" +
+        "      };\n" +
         "\n" +
-        "        // Special case of showing a marker only for the center. Might be possible to abstract in\n" +
-        "        // markerFunctions, but leaving it here for now (jos).\n" +
-        "        var showCenter = function(show){\n" +
-        "          if (show) {\n" +
-        "            if (centerMarker)\n" +
-        "              centerMarker.setMap(map);\n" +
-        "          } else {\n" +
-        "            centerMarker.setMap(null);\n" +
-        "          }\n" +
+        "      // Special case of showing a marker only for the center. Might be possible to abstract in\n" +
+        "      // markerFunctions, but leaving it here for now (jos).\n" +
+        "      var showCenter = function(show) {\n" +
+        "        centerMarker.setVisible(show);\n" +
+        "      };\n" +
         "\n" +
-        "          showingCenter = show;\n" +
-        "        };\n" +
+        "      var getCenter = function() {\n" +
+        "        return androidObject.sendCenterMarkerToAndroid(centerMarker.createJsonMarker());\n" +
+        "      };\n" +
         "\n" +
-        "        var getCenter = function() { \n" +
-        "          return androidObject.sendCenterMarkerToAndroid(centerMarker.createJsonMarker()); \n" +
-        "        };\n" +
+        "      var getAllMarkers = function() {\n" +
+        "        return allMarkers;\n" +
+        "      };\n" +
         "\n" +
-        "        var getGoogleMapObject = function() { return map; };\n" +
+        "      var getMarker = function(location) {\n" +
+        "        return allMarkers[location.toString()];\n" +
+        "      };\n" +
         "\n" +
-        "        //not sure why we need this getter; what is the use case for needing these functions?\n" +
-        "        //var getMarkerFunctions = function() { return markerFunctions; };\n" +
+        "      var getMap = function() {\n" +
+        "        return map;\n" +
+        "      }\n" +
         "\n" +
-        "        var getAllMarkers = function() { return allMarkers; };\n" +
         "\n" +
-        "        var getMarker = function(location) {\n" +
-        "          return allMarkers[location.toString()];\n" +
-        "        };\n" +
-        "\n" +
-        "        var getMap = function() {\n" +
-        "          return map;\n" +
+        "      /**\n" +
+        "       * Add a marker, with additional information, to the map.\n" +
+        "       * @param location {google.maps.LatLng} object specifying the position in the map\n" +
+        "       * @param infoWindowContent content to be displayed in this marker infoWindow\n" +
+        "       * @param title a title for the marker (shown on hover in browsers)\n" +
+        "       */\n" +
+        "      var createMarker = function(location, title) { //, infoWindowContent){ \n" +
+        "        var marker;\n" +
+        "        var loc;\n" +
+        "        var lat;\n" +
+        "        var lng;\n" +
+        "        var existingMarker;\n" +
+        "        if (location instanceof google.maps.LatLng) {\n" +
+        "          loc = location;\n" +
+        "        } else if (typeof location === \"string\") {\n" +
+        "          loc = locationFromTextCoords(location);\n" +
+        "        } else if (location.length == 2) {\n" +
+        "          loc = locationFromLatLngCoords(location[0], location[1]);\n" +
+        "        } else {\n" +
+        "          //try geolocating from address\n" +
+        "          //else throw error\n" +
+        "          console.log(\"No valid location.\");\n" +
+        "          return null;\n" +
         "        }\n" +
+        "        lat = loc.lat();\n" +
+        "        lng = loc.lng();\n" +
         "\n" +
+        "        existingMarker = getMarker(loc);\n" +
+        "        if (existingMarker) { //If it exists, there's no need to create it\n" +
+        "          marker = existingMarker;\n" +
         "\n" +
-        "        /**\n" +
-        "         * Add a marker, with additional information, to the map.\n" +
-        "         * @param location {google.maps.LatLng} object specifying the position in the map\n" +
-        "         * @param infoWindowContent content to be displayed in this marker infoWindow\n" +
-        "         * @param title a title for the marker (shown on hover in browsers)\n" +
-        "         */\n" +
-        "        var createMarker = function(location, title) {//, infoWindowContent){ \n" +
-        "          var marker;\n" +
-        "          var loc;\n" +
-        "          var lat;\n" +
-        "          var lng;\n" +
-        "          var existingMarker;\n" +
-        "          if (location instanceof google.maps.LatLng) {\n" +
-        "            loc = location;\n" +
-        "          } else if (typeof location === \"string\") {\n" +
-        "            loc = locationFromTextCoords(location);\n" +
-        "          } else if (location.length == 2) {\n" +
-        "            loc = locationFromLatLngCoords(location[0], location[1]);\n" +
-        "          } else {\n" +
-        "            //try geolocating from address\n" +
-        "            //else throw error\n" +
-        "            console.log(\"No valid location.\");\n" +
-        "            return null;\n" +
-        "          }\n" +
-        "          lat = loc.lat();\n" +
-        "          lng = loc.lng();\n" +
+        "          // We override values even if they are not different - it's easier.\n" +
+        "          // marker.title = title;\n" +
+        "          // if (infoWindowContent && marker.info){\n" +
+        "          //   marker.info.setContent(infoWindowContent);\n" +
+        "          // }\n" +
+        "        } else {\n" +
+        "          marker = new markerContainer(map, lat, lng, title, null, null, true, true);\n" +
+        "          marker.initialize();\n" +
+        "          addMarker(marker);\n" +
+        "          console.log(\"Added\", title, \"marker at: \", lat, lng);\n" +
         "\n" +
-        "          existingMarker = getMarker(loc);\n" +
-        "          if (existingMarker) { //If it exists, there's no need to create it\n" +
-        "            marker = existingMarker;\n" +
-        "\n" +
-        "            // We override values even if they are not different - it's easier.\n" +
-        "            // marker.title = title;\n" +
-        "            // if (infoWindowContent && marker.info){\n" +
-        "            //   marker.info.setContent(infoWindowContent);\n" +
-        "            // }\n" +
-        "          } else {\n" +
-        "            marker = new markerContainer(map, lat, lng, title, null, null, true, true);\n" +
-        "            addMarker(marker);\n" +
-        "\n" +
-        "            // if (infoWindowContent) {\n" +
-        "            //   markerFunctions.createInfoWindow(marker.getPosition().toString(), infoWindowContent);\n" +
-        "            // }\n" +
-        "          }\n" +
+        "          // if (infoWindowContent) {\n" +
+        "          //   markerFunctions.createInfoWindow(marker.getPosition().toString(), infoWindowContent);\n" +
+        "          // }\n" +
+        "        }\n" +
         "        // } else if () {\n" +
         "\n" +
         "        //   // if {\n" +
@@ -382,230 +376,233 @@ public class WebMap extends AndroidViewComponent {
         "        //   // }\n" +
         "        // }\n" +
         "\n" +
-        "          return marker;\n" +
+        "        return marker;\n" +
         "\n" +
-        "        };\n" +
-        "\n" +
-        "        /**\n" +
-        "         * Decodes the JSON input and generates and displays markers for each of the objects.\n" +
-        "         * Sample data:\n" +
-        "         * \"[\n" +
-        "         *     {\"lat\":48.856614,\"lng\":2.3522219000000177,\"title\":\"\",\"content\":\"\"},\n" +
-        "         *     {\"lat\":48,\"lng\":3,\"title\":\"near paris\",\"content\":\"near Paris content\"}\n" +
-        "         *  ]\"\n" +
-        "         * @param listOfMarkers a JSON representation of the markers to be displayed\n" +
-        "         */\n" +
-        "         //TODO: Do we really want to have a json list? what about a yaillist? or the app inventor list structure?\n" +
-        "        var createMarkersFromList = function(listOfMarkers) {\n" +
-        "          try {\n" +
-        "            var allParsedMarkers = JSON.parse(listOfMarkers);\n" +
-        "          } catch(parseError) {\n" +
-        "            console.log('List of Markers is not valid JSON. Notifying Android side.');\n" +
-        "            return;\n" +
-        "          }\n" +
-        "\n" +
-        "          function decodeMarker(markerObject){\n" +
-        "            var markerData = [];\n" +
-        "            var lat, lng;\n" +
-        "\n" +
-        "            if (markerObject.lat)\n" +
-        "              lat = markerObject.lat;\n" +
-        "\n" +
-        "            if (markerObject.lng)\n" +
-        "              lng = markerObject.lng;\n" +
-        "\n" +
-        "            if (lat && lng)\n" +
-        "              markerData[0] = locationFromLatLngCoords(lat, lng);\n" +
-        "\n" +
-        "            if (markerObject.title)\n" +
-        "              markerData[1] = markerObject.title;\n" +
-        "\n" +
-        "            if (markerObject.content)\n" +
-        "              markerData[2] = markerObject.content;\n" +
-        "\n" +
-        "            // Location has to be available(other fields are optional).\n" +
-        "            if (markerData[0] instanceof google.maps.LatLng)\n" +
-        "              return markerData;\n" +
-        "            else //TODO (jos) trigger user feedback or not?\n" +
-        "              return null;\n" +
-        "          }\n" +
-        "\n" +
-        "          allParsedMarkers.forEach(function(markerObject) {\n" +
-        "            // Try to decode each marker and even if some fail, still add the others.\n" +
-        "            var markerData = decodeMarker(markerObject);\n" +
-        "            if (markerData)\n" +
-        "              createMarker(markerData[0], markerData[1], markerData[2]);\n" +
-        "          });\n" +
-        "        };\n" +
-        "\n" +
-        "\n" +
-        "        //TODO Verify the marker isn't already in the dict? If it is already in the dict it will be overwritten.\n" +
-        "        var addMarker = function(marker) {\n" +
-        "          var loc = marker.getPosition().toString();\n" +
-        "          allMarkers[loc] = marker;\n" +
-        "        };\n" +
-        "\n" +
-        "        var addMarkersFromList = function(markerList) {\n" +
-        "          //TODO link this in to create marker if not already a marker object?\n" +
-        "          for (i = 0; i < markerList.length; i++) {\n" +
-        "            if (!getMarker(markerList[i].prototype.getPosition().toString())) {\n" +
-        "              addMarker(markerList[i]);\n" +
-        "            }\n" +
-        "          }\n" +
-        "          showMarkers(true);\n" +
-        "        };\n" +
-        "        \n" +
-        "        var locationFromLatLngCoords = function(lat, lng){\n" +
-        "          var errorParsing = false;\n" +
-        "          if (isNaN(lat) || isNaN(lng)) errorParsing = true;\n" +
-        "          //DO WE NEED TO DO THIS? the LatLng will clamp or wrap the coordinates. \n" +
-        "          // if (lat < -90 || lat > 90) errorParsing = true;\n" +
-        "          // if (lng < -180 || lng > 180) errorParsing = true;\n" +
-        "\n" +
-        "          if (errorParsing) {\n" +
-        "            return null;\n" +
-        "          } else {\n" +
-        "            return new google.maps.LatLng(lat, lng);\n" +
-        "          }\n" +
-        "        };\n" +
-        "\n" +
-        "        /**\n" +
-        "         * Generates a LatLng map object from coordinates passed in as a string. Valid ranges are:\n" +
-        "         * Lat [-90, 90], and Lng [-180, 180].\n" +
-        "         * @param locationText a string in the format 'float, float'\n" +
-        "         * @returns {google.maps.LatLng} a LatLng object or null if the location is not in the\n" +
-        "         * right format.\n" +
-        "         */\n" +
-        "        var locationFromTextCoords = function(locationText) {\n" +
-        "          var lat, lng;\n" +
-        "          var locationSplit = locationText.split(',');\n" +
-        "          if (locationSplit.length === 2){\n" +
-        "            lat = parseFloat(locationSplit[0]);\n" +
-        "            lng = parseFloat(locationSplit[1]);\n" +
-        "            return locationFromLatLngCoords(lat, lng);\n" +
-        "          } else {\n" +
-        "            return null;\n" +
-        "          }\n" +
-        "        };\n" +
-        "\n" +
-        "        var showMarkers = function (show){\n" +
-        "          if (show) {\n" +
-        "            for (var key in allMarkers){\n" +
-        "              getMarker(key).setMap(map);\n" +
-        "            }\n" +
-        "          } else {\n" +
-        "            for (var key in allMarkers){\n" +
-        "              getMarker(key).setMap(null);\n" +
-        "            }\n" +
-        "          }\n" +
-        "        };\n" +
-        "\n" +
-        "        //Geolocation service\n" +
-        "        var getGeolocationFromAddress = function (address){\n" +
-        "          var geocoder = new google.maps.Geocoder();\n" +
-        "          geocoder.geocode({address: address}, geolocationResults)\n" +
-        "        };\n" +
-        "\n" +
-        "        function geolocationResults(results, status){\n" +
-        "          if (status === 'OK') {\n" +
-        "            var firstLocationFound = results[0].geometry.location;\n" +
-        "            if (firstLocationFound){\n" +
-        "              console.log(\"First loc:\", firstLocationFound);\n" +
-        "              var marker = createMarker(firstLocationFound);\n" +
-        "              var markerJson = createJsonMarkerFromId(marker.prototype.getPosition().toString());\n" +
-        "              // return firstLocationFound;\n" +
-        "            } else {\n" +
-        "              console.log('No location found!');\n" +
-        "            }\n" +
-        "          } else if (status === \"ZERO_RESULTS\"){\n" +
-        "            console.log('No results found for that particular address.');\n" +
-        "          } else {\n" +
-        "            console.log('No results found. Status of Geolocation call: ' + status);\n" +
-        "          }\n" +
-        "        };\n" +
-        "\n" +
-        "        var deleteAllMarkers = function() {\n" +
-        "          showMarkers(false);\n" +
-        "          allMarkers = {};\n" +
-        "        };\n" +
-        "\n" +
-        "        var deleteMarker = function(markerId) {\n" +
-        "          if (allMarkers[markerId]) {\n" +
-        "            allMarkers[markerId].setMap(null);\n" +
-        "            delete allMarkers[markerId];\n" +
-        "          }\n" +
-        "\n" +
-        "        };\n" +
-        "\n" +
-        "        var setZoom = function(zoom) {\n" +
-        "          if (zoom >= 0 && zoom <= 19){\n" +
-        "            map.setZoom(zoom);\n" +
-        "          } else { // Exception handling is also done on Android side\n" +
-        "            console.log('Zoom value ' + zoom + ' is not in the valid range 0-19');\n" +
-        "          }\n" +
-        "        };\n" +
-        "\n" +
-        "        var getZoom = function() { return map.zoom; };\n" +
-        "\n" +
-        "        var panToMarker = function(markerId) {\n" +
-        "          var markerToPanTo = getMarker(markerId);\n" +
-        "          if (markerToPanTo)\n" +
-        "            map.panTo(markerToPanTo.getPosition());\n" +
-        "        };\n" +
-        "\n" +
-        "        //API for the thisMap object: main entry object for functionality\n" +
-        "        return {\n" +
-        "          initialize: initialize,\n" +
-        "          showCenter: showCenter,\n" +
-        "          setCenter: setCenter,\n" +
-        "          getCenter: getCenter,\n" +
-        "          getGoogleMapObject: getGoogleMapObject, // For Debugging (not used from the component).\n" +
-        "          //getMarkerFunctions: getMarkerFunctions,\n" +
-        "          getAllMarkers: getAllMarkers,\n" +
-        "          getMarker: getMarker,\n" +
-        "          createMarker: createMarker,\n" +
-        "          createMarkersFromList: createMarkersFromList,\n" +
-        "          addMarkersFromList: addMarkersFromList,\n" +
-        "          locationFromLatLngCoords: locationFromLatLngCoords,\n" +
-        "          locationFromTextCoords: locationFromTextCoords,\n" +
-        "          getGeolocationFromAddress: getGeolocationFromAddress,\n" +
-        "          showMarkers: showMarkers,\n" +
-        "          deleteMarker: deleteMarker,\n" +
-        "          deleteAllMarkers: deleteAllMarkers,\n" +
-        "          setZoom: setZoom,\n" +
-        "          getZoom: getZoom,\n" +
-        "          panToMarker: panToMarker,\n" +
-        "          getMap: getMap\n" +
-        "        }\n" +
-        "      //TODO (jos) Magic numbers: the center of the map will come from Android\n" +
-        "      } (42.3598, -71.0921, true, 2); //Auto initialize the thisMap object\n" +
-        "\n" +
+        "      };\n" +
         "\n" +
         "      /**\n" +
-        "       * This function returns an object with certain methods exposed as its API. The functionality\n" +
-        "       * of this object is related to management of markers in the map.\n" +
-        "       * @returns an Object with methods related to Marker management.\n" +
-        "       * @param map the map to associate the markers with. thisMap object from above.\n" +
+        "       * Decodes the JSON input and generates and displays markers for each of the objects.\n" +
+        "       * Sample data:\n" +
+        "       * \"[\n" +
+        "       *     {\"lat\":48.856614,\"lng\":2.3522219000000177,\"title\":\"\",\"content\":\"\"},\n" +
+        "       *     {\"lat\":48,\"lng\":3,\"title\":\"near paris\",\"content\":\"near Paris content\"}\n" +
+        "       *  ]\"\n" +
+        "       * @param listOfMarkers a JSON representation of the markers to be displayed\n" +
         "       */\n" +
-        "      function markerContainer(map, lat, lng, title, icon, clickable, visible) {\n" +
-        "\n" +
-        "        var marker;\n" +
-        "        var id;\n" +
-        "\n" +
-        "        function initialize() {\n" +
-        "          var markerOptions = {\n" +
-        "              map: map,\n" +
-        "              position: {lat: lat, lng: lng},\n" +
-        "              title: title,\n" +
-        "              icon: icon,\n" +
-        "              clickable: clickable,\n" +
-        "              visible: visible\n" +
-        "            };\n" +
-        "\n" +
-        "          marker = new google.maps.Marker(markerOptions);\n" +
-        "          id = marker.getPosition().toString();\n" +
-        "          return marker;\n" +
+        "      //TODO: Do we really want to have a json list? what about a yaillist? or the app inventor list structure?\n" +
+        "      var createMarkersFromList = function(listOfMarkers) {\n" +
+        "        try {\n" +
+        "          var allParsedMarkers = JSON.parse(listOfMarkers);\n" +
+        "        } catch (parseError) {\n" +
+        "          console.log('List of Markers is not valid JSON. Notifying Android side.');\n" +
+        "          return;\n" +
         "        }\n" +
+        "\n" +
+        "        function decodeMarker(markerObject) {\n" +
+        "          var markerData = [];\n" +
+        "          var lat, lng;\n" +
+        "\n" +
+        "          if (markerObject.lat)\n" +
+        "            lat = markerObject.lat;\n" +
+        "\n" +
+        "          if (markerObject.lng)\n" +
+        "            lng = markerObject.lng;\n" +
+        "\n" +
+        "          if (lat && lng)\n" +
+        "            markerData[0] = locationFromLatLngCoords(lat, lng);\n" +
+        "\n" +
+        "          if (markerObject.title)\n" +
+        "            markerData[1] = markerObject.title;\n" +
+        "\n" +
+        "          if (markerObject.content)\n" +
+        "            markerData[2] = markerObject.content;\n" +
+        "\n" +
+        "          // Location has to be available(other fields are optional).\n" +
+        "          if (markerData[0] instanceof google.maps.LatLng)\n" +
+        "            return markerData;\n" +
+        "          else //TODO (jos) trigger user feedback or not?\n" +
+        "            return null;\n" +
+        "        }\n" +
+        "\n" +
+        "        allParsedMarkers.forEach(function(markerObject) {\n" +
+        "          // Try to decode each marker and even if some fail, still add the others.\n" +
+        "          var markerData = decodeMarker(markerObject);\n" +
+        "          if (markerData)\n" +
+        "            createMarker(markerData[0], markerData[1], markerData[2]);\n" +
+        "        });\n" +
+        "      };\n" +
+        "\n" +
+        "\n" +
+        "      //TODO Verify the marker isn't already in the dict? If it is already in the dict it will be overwritten.\n" +
+        "      var addMarker = function(m) {\n" +
+        "        var loc = m.getPosition().toString();\n" +
+        "        allMarkers[loc] = m;\n" +
+        "      };\n" +
+        "\n" +
+        "      var addMarkersFromList = function(markerList) {\n" +
+        "        //TODO link this in to create marker if not already a marker object?\n" +
+        "        for (i = 0; i < markerList.length; i++) {\n" +
+        "          if (!getMarker(markerList[i].prototype.getPosition().toString())) {\n" +
+        "            addMarker(markerList[i]);\n" +
+        "          }\n" +
+        "        }\n" +
+        "        showMarkers(true);\n" +
+        "      };\n" +
+        "\n" +
+        "      var locationFromLatLngCoords = function(lat, lng) {\n" +
+        "        var errorParsing = false;\n" +
+        "        if (isNaN(lat) || isNaN(lng)) errorParsing = true;\n" +
+        "        //DO WE NEED TO DO THIS? the LatLng will clamp or wrap the coordinates. \n" +
+        "        // if (lat < -90 || lat > 90) errorParsing = true;\n" +
+        "        // if (lng < -180 || lng > 180) errorParsing = true;\n" +
+        "\n" +
+        "        if (errorParsing) {\n" +
+        "          return null;\n" +
+        "        } else {\n" +
+        "          return new google.maps.LatLng(lat, lng);\n" +
+        "        }\n" +
+        "      };\n" +
+        "\n" +
+        "      /**\n" +
+        "       * Generates a LatLng map object from coordinates passed in as a string. Valid ranges are:\n" +
+        "       * Lat [-90, 90], and Lng [-180, 180].\n" +
+        "       * @param locationText a string in the format 'float, float'\n" +
+        "       * @returns {google.maps.LatLng} a LatLng object or null if the location is not in the\n" +
+        "       * right format.\n" +
+        "       */\n" +
+        "      var locationFromTextCoords = function(locationText) {\n" +
+        "        var lat, lng;\n" +
+        "        var locationSplit = locationText.split(',');\n" +
+        "        if (locationSplit.length === 2) {\n" +
+        "          lat = parseFloat(locationSplit[0]);\n" +
+        "          lng = parseFloat(locationSplit[1]);\n" +
+        "          return locationFromLatLngCoords(lat, lng);\n" +
+        "        } else {\n" +
+        "          return null;\n" +
+        "        }\n" +
+        "      };\n" +
+        "\n" +
+        "      var showMarkers = function(show) {\n" +
+        "        for (var key in allMarkers) {\n" +
+        "          getMarker(key).setVisible(show);\n" +
+        "        }\n" +
+        "      };\n" +
+        "\n" +
+        "      //Geolocation service\n" +
+        "      var getGeolocationFromAddress = function(address) {\n" +
+        "        var geocoder = new google.maps.Geocoder();\n" +
+        "        geocoder.geocode({\n" +
+        "          address: address\n" +
+        "        }, geolocationResults)\n" +
+        "      };\n" +
+        "\n" +
+        "      function geolocationResults(results, status) {\n" +
+        "        if (status === 'OK') {\n" +
+        "          var firstLocationFound = results[0].geometry.location;\n" +
+        "          if (firstLocationFound) {\n" +
+        "            console.log(\"First loc:\", firstLocationFound);\n" +
+        "            var m = createMarker(firstLocationFound);\n" +
+        "            var markerJson = m.createJsonMarker();\n" +
+        "            return firstLocationFound;\n" +
+        "          } else {\n" +
+        "            console.log('No location found!');\n" +
+        "          }\n" +
+        "        } else if (status === \"ZERO_RESULTS\") {\n" +
+        "          console.log('No results found for that particular address.');\n" +
+        "        } else {\n" +
+        "          console.log('No results found. Status of Geolocation call: ' + status);\n" +
+        "        }\n" +
+        "      }\n" +
+        "\n" +
+        "      var deleteAllMarkers = function() {\n" +
+        "        for (var key in allMarkers) {\n" +
+        "          getMarker(key).setMap(null);\n" +
+        "        }\n" +
+        "        allMarkers = {};\n" +
+        "      };\n" +
+        "\n" +
+        "      var deleteMarker = function(markerId) {\n" +
+        "        if (allMarkers[markerId]) {\n" +
+        "          allMarkers[markerId].setMap(null);\n" +
+        "          delete allMarkers[markerId];\n" +
+        "        }\n" +
+        "\n" +
+        "      };\n" +
+        "\n" +
+        "      var setZoom = function(zoom) {\n" +
+        "        if (zoom >= 0 && zoom <= 19) {\n" +
+        "          map.setZoom(zoom);\n" +
+        "        } else { // Exception handling is also done on Android side\n" +
+        "          console.log('Zoom value ' + zoom + ' is not in the valid range 0-19');\n" +
+        "        }\n" +
+        "      };\n" +
+        "\n" +
+        "      var getZoom = function() {\n" +
+        "        return map.zoom;\n" +
+        "      };\n" +
+        "\n" +
+        "      var panToMarker = function(markerId) {\n" +
+        "        var markerToPanTo = getMarker(markerId);\n" +
+        "        if (markerToPanTo)\n" +
+        "          map.panTo(markerToPanTo.getPosition());\n" +
+        "      };\n" +
+        "\n" +
+        "      //API for the thisMap object: main entry object for functionality\n" +
+        "      return {\n" +
+        "        initialize: initialize,\n" +
+        "        showCenter: showCenter,\n" +
+        "        setCenter: setCenter,\n" +
+        "        getCenter: getCenter,\n" +
+        "        getMap: getMap,\n" +
+        "        getAllMarkers: getAllMarkers,\n" +
+        "        getMarker: getMarker,\n" +
+        "        createMarker: createMarker,\n" +
+        "        createMarkersFromList: createMarkersFromList,\n" +
+        "        showMarkers: showMarkers,\n" +
+        "        deleteMarker: deleteMarker,\n" +
+        "        deleteAllMarkers: deleteAllMarkers,\n" +
+        "        setZoom: setZoom,\n" +
+        "        getZoom: getZoom,\n" +
+        "        panToMarker: panToMarker \n" +
+        "      }\n" +
+        "      //TODO (jos) Magic numbers: the center of the map will come from Android\n" +
+        "    }(42.3598, -71.0921, true, 2); //Auto initialize the thisMap object\n" +
+        "\n" +
+        "\n" +
+        "    /**\n" +
+        "     * This function returns an object with certain methods exposed as its API. The functionality\n" +
+        "     * of this object is related to management of markers in the map.\n" +
+        "     * @returns an Object with methods related to Marker management.\n" +
+        "     * @param map the map to associate the markers with. thisMap object from above.\n" +
+        "     */\n" +
+        "    function markerContainer(map, lat, lng, title, icon, clickable, visible) {\n" +
+        "      var marker;\n" +
+        "      var id;\n" +
+        "      var map = map;\n" +
+        "      var lat = lat;\n" +
+        "      var lng = lng;\n" +
+        "      var title = title;\n" +
+        "      var icon = icon;\n" +
+        "      var clickable = clickable; \n" +
+        "      var visible = visible;\n" +
+        "\n" +
+        "      function initialize() {\n" +
+        "        var markerOptions = {\n" +
+        "          map: map,\n" +
+        "          position: {\n" +
+        "            lat: lat,\n" +
+        "            lng: lng\n" +
+        "          },\n" +
+        "          title: title,\n" +
+        "          icon: icon,\n" +
+        "          clickable: clickable,\n" +
+        "          visible: visible\n" +
+        "        };\n" +
+        "\n" +
+        "        marker = new google.maps.Marker(markerOptions);\n" +
+        "        id = marker.getPosition().toString();\n" +
+        "        // return marker;\n" +
+        "      }\n" +
         "\n" +
         "      //this exists in the map container\n" +
         "      // markerContainer.deleteMarker = function() {\n" +
@@ -677,20 +674,23 @@ public class WebMap extends AndroidViewComponent {
         "      }\n" +
         "\n" +
         "      var setPosition = function(lat, lng) {\n" +
-        "        marker.setPosition({lat: lat, lng: lng});\n" +
+        "        marker.setPosition({\n" +
+        "          lat: lat,\n" +
+        "          lng: lng\n" +
+        "        });\n" +
         "      };\n" +
         "\n" +
         "      var setVisible = function(visible) {\n" +
         "        marker.setVisible(visible);\n" +
         "      };\n" +
         "\n" +
-        "      var createJsonMarker = function(){\n" +
+        "      var createJsonMarker = function() {\n" +
         "        var markerObject = {\n" +
         "          lat: marker.getPosition().lat(),\n" +
         "          lng: marker.getPosition().lng(),\n" +
         "          title: marker.title || '',\n" +
         "          info: (marker.info && marker.info.content) ?\n" +
-        "              marker.info.content : ''\n" +
+        "            marker.info.content : ''\n" +
         "        }\n" +
         "        var markerJson = JSON.stringify(markerObject);\n" +
         "\n" +
@@ -716,12 +716,12 @@ public class WebMap extends AndroidViewComponent {
         "        marker.info = infoWindow;\n" +
         "      };\n" +
         "\n" +
-        "      var openInfoWindow = function(){\n" +
+        "      var openInfoWindow = function() {\n" +
         "        if (marker && marker.info)\n" +
         "          marker.info.open(marker.map, marker);\n" +
         "      };\n" +
         "\n" +
-        "      var closeInfoWindow = function(){\n" +
+        "      var closeInfoWindow = function() {\n" +
         "        if (marker && marker.info)\n" +
         "          marker.info.close();\n" +
         "      };\n" +
@@ -751,94 +751,95 @@ public class WebMap extends AndroidViewComponent {
         "        openInfoWindow: openInfoWindow,\n" +
         "        closeInfoWindow: closeInfoWindow\n" +
         "      }\n" +
+        "    }\n" +
+        "    /**\n" +
+        "     * An object to hold functions that communicate directly to Android through the JS interface.\n" +
+        "     * @type {{ERROR_ILLEGAL_COORDS_FORMAT: number, ERROR_PARSING_MARKERS_LIST: number,\n" +
+        "     * ERROR_NO_GEOLOCATION_RESULTS: number, dispatchErrorToAndroid: dispatchErrorToAndroid,\n" +
+        "     * sendMarkerToAndroid: sendMarkerToAndroid,\n" +
+        "     * sendDoubleMarkerToAndroid: sendDoubleMarkerToAndroid,\n" +
+        "     * sendListOfMarkersToAndroid: sendListOfMarkersToAndroid,\n" +
+        "     * mapIsReadyToAndroid: mapIsReadyToAndroid,\n" +
+        "     * sendUserMarkerAddedToAndroid: sendUserMarkerAddedToAndroid,\n" +
+        "     * sendGeolocationMarkerAddedToAndroid: sendGeolocationMarkerAddedToAndroid}}\n" +
+        "     */\n" +
+        "    var androidObject = {\n" +
+        "\n" +
+        "      // CONSTANTS FOR ERRORS, As defined on the Android side.\n" +
+        "      ERROR_ILLEGAL_COORDS_FORMAT: 2802,\n" +
+        "      ERROR_PARSING_MARKERS_LIST: 2803,\n" +
+        "      ERROR_INVALID_MARKER: 2804,\n" +
+        "      ERROR_NO_GEOLOCATION_RESULTS: 2806,\n" +
         "\n" +
         "      /**\n" +
-        "       * An object to hold functions that communicate directly to Android through the JS interface.\n" +
-        "       * @type {{ERROR_ILLEGAL_COORDS_FORMAT: number, ERROR_PARSING_MARKERS_LIST: number,\n" +
-        "       * ERROR_NO_GEOLOCATION_RESULTS: number, dispatchErrorToAndroid: dispatchErrorToAndroid,\n" +
-        "       * sendMarkerToAndroid: sendMarkerToAndroid,\n" +
-        "       * sendDoubleMarkerToAndroid: sendDoubleMarkerToAndroid,\n" +
-        "       * sendListOfMarkersToAndroid: sendListOfMarkersToAndroid,\n" +
-        "       * mapIsReadyToAndroid: mapIsReadyToAndroid,\n" +
-        "       * sendUserMarkerAddedToAndroid: sendUserMarkerAddedToAndroid,\n" +
-        "       * sendGeolocationMarkerAddedToAndroid: sendGeolocationMarkerAddedToAndroid}}\n" +
+        "       * Function to dispatch errors to Android through the AppInventorMap interface. If this\n" +
+        "       * file is loaded on a browser, AppInventorMap will be undefined and we skip the\n" +
+        "       * dispatching.\n" +
+        "       * TODO (jos) think about Error handling in JS if I even want to use this file standalone.\n" +
+        "       * @param errorNumber number for the message to display as user feedback on the Android\n" +
+        "       * side. The messages are defined in ErrorMessages.java\n" +
         "       */\n" +
-        "      var androidObject = {\n" +
+        "      dispatchErrorToAndroid: function(errorNumber) {\n" +
+        "        if (typeof AppInventorMap !== 'undefined')\n" +
+        "          AppInventorMap.dispatchError(errorNumber);\n" +
+        "      },\n" +
         "\n" +
-        "        // CONSTANTS FOR ERRORS, As defined on the Android side.\n" +
-        "        ERROR_ILLEGAL_COORDS_FORMAT: 3102,\n" +
-        "        ERROR_PARSING_MARKERS_LIST: 3103,\n" +
-        "        ERROR_INVALID_MARKER: 3104,\n" +
-        "        ERROR_NO_GEOLOCATION_RESULTS: 3106,\n" +
+        "      sendCenterMarkerToAndroid: function(jsonMarker) {\n" +
+        "        if (typeof AppInventorMap !== 'undefined')\n" +
+        "          AppInventorMap.handleMarker(jsonMarker);\n" +
         "\n" +
-        "        /**\n" +
-        "         * Function to dispatch errors to Android through the AppInventorMap interface. If this\n" +
-        "         * file is loaded on a browser, AppInventorMap will be undefined and we skip the\n" +
-        "         * dispatching.\n" +
-        "         * TODO (jos) think about Error handling in JS if I even want to use this file standalone.\n" +
-        "         * @param errorNumber number for the message to display as user feedback on the Android\n" +
-        "         * side. The messages are defined in ErrorMessages.java\n" +
-        "         */\n" +
-        "        dispatchErrorToAndroid: function(errorNumber) {\n" +
-        "          if (typeof AppInventorMap !== 'undefined')\n" +
-        "            AppInventorMap.dispatchError(errorNumber);\n" +
-        "        },\n" +
+        "      },\n" +
         "\n" +
-        "        sendCenterMarkerToAndroid: function(jsonMarker) {\n" +
-        "          if (typeof AppInventorMap !== 'undefined')\n" +
-        "            AppInventorMap.handleMarker(jsonMarker);\n" +
+        "      /**\n" +
+        "       * Function to call to the Android side after a user has clicked on a marker\n" +
+        "       */\n" +
+        "      sendMarkerToAndroid: function(jsonMarker) {\n" +
+        "        if (typeof AppInventorMap !== 'undefined')\n" +
+        "          AppInventorMap.handleMarker(jsonMarker);\n" +
+        "      },\n" +
         "\n" +
-        "        },\n" +
+        "      sendDoubleMarkerToAndroid: function(jsonMarker) {\n" +
+        "        if (typeof AppInventorMap !== 'undefined')\n" +
+        "          AppInventorMap.handleDoubleMarker(jsonMarker);\n" +
+        "      },\n" +
         "\n" +
-        "        /**\n" +
-        "         * Function to call to the Android side after a user has clicked on a marker\n" +
-        "         */\n" +
-        "        sendMarkerToAndroid: function(jsonMarker) {\n" +
-        "          if (typeof AppInventorMap !== 'undefined')\n" +
-        "            AppInventorMap.handleMarker(jsonMarker);\n" +
-        "        },\n" +
+        "      /**\n" +
+        "       * Function to export all markers to the Android side for storage\n" +
+        "       */\n" +
+        "      sendListOfMarkersToAndroid: function(markers) {\n" +
+        "        if (typeof AppInventorMap !== 'undefined')\n" +
+        "          AppInventorMap.storeMarkers(markers);\n" +
+        "      },\n" +
         "\n" +
-        "        sendDoubleMarkerToAndroid: function(jsonMarker) {\n" +
-        "          if (typeof AppInventorMap !== 'undefined')\n" +
-        "            AppInventorMap.handleDoubleMarker(jsonMarker);\n" +
-        "        },\n" +
+        "      /**\n" +
+        "       * Notify Component that the Map is ready.\n" +
+        "       */\n" +
+        "      mapIsReadyToAndroid: function() {\n" +
+        "        if (typeof AppInventorMap !== 'undefined')\n" +
+        "          AppInventorMap.mapIsReady();\n" +
+        "      },\n" +
         "\n" +
-        "        /**\n" +
-        "         * Function to export all markers to the Android side for storage\n" +
-        "         */\n" +
-        "        sendListOfMarkersToAndroid: function(markers) {\n" +
-        "          if (typeof AppInventorMap !== 'undefined')\n" +
-        "            AppInventorMap.storeMarkers(markers);\n" +
-        "        },\n" +
+        "      sendUserMarkerAddedToAndroid: function(markerJson) {\n" +
+        "        if (typeof AppInventorMap !== 'undefined')\n" +
+        "          AppInventorMap.userMarkerAdded(markerJson);\n" +
+        "      },\n" +
         "\n" +
-        "        /**\n" +
-        "         * Notify Component that the Map is ready.\n" +
-        "         */\n" +
-        "        mapIsReadyToAndroid: function() {\n" +
-        "          if (typeof AppInventorMap !== 'undefined')\n" +
-        "            AppInventorMap.mapIsReady();\n" +
-        "        },\n" +
+        "      sendGeolocationMarkerAddedToAndroid: function(markerJson, formattedAddress) {\n" +
+        "        if (typeof AppInventorMap !== 'undefined')\n" +
+        "          AppInventorMap.geolocationMarkerAdded(markerJson, formattedAddress);\n" +
+        "      }\n" +
         "\n" +
-        "        sendUserMarkerAddedToAndroid: function(markerJson) {\n" +
-        "          if (typeof AppInventorMap !== 'undefined')\n" +
-        "            AppInventorMap.userMarkerAdded(markerJson);\n" +
-        "        },\n" +
+        "    };\n" +
         "\n" +
-        "        sendGeolocationMarkerAddedToAndroid: function(markerJson, formattedAddress) {\n" +
-        "          if (typeof AppInventorMap !== 'undefined')\n" +
-        "            AppInventorMap.geolocationMarkerAdded(markerJson, formattedAddress);\n" +
-        "        }\n" +
+        "    google.maps.event.addDomListener(window, 'load', mapContainer.initialize);\n" +
+        "  </script>\n" +
+        "</head>\n" +
         "\n" +
-        "      };\n" +
+        "<body>\n" +
+        "  <div id=\"map-canvas\"></div>\n" +
+        "</body>\n" +
         "\n" +
-        "      google.maps.event.addDomListener(window, 'load', mapContainer.initialize);\n" +
-        "\n" +
-        "    </script>\n" +
-        "  </head>\n" +
-        "  <body>\n" +
-        "    <div id=\"map-canvas\"></div>\n" +
-        "  </body>\n" +
-        "</html>\n";
+        "</html>";
 
 //    webview.loadUrl("file:///sdcard/AppInventor/assets/map.html");
     webview.loadDataWithBaseURL(null, map, "text/html", "utf-8", null);
@@ -850,14 +851,14 @@ public class WebMap extends AndroidViewComponent {
    *
    * @param allowUserMarkers  {@code true} markers allowed, {@code false} markers not allowed
    */
-  @SimpleFunction(description = "Specifies whether users will be able to add markers by clicking " +
-      "on the map. True will make the map listen for clicks. False will unbind the listener.")
-  //TODO (ajcolter) is there a better name that could be used?
-  //TODO (ajcolter) make a map property instead?
-  public void AllowUserMarkers(boolean allowUserMarkers) {
-    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().addListenersForMarkers(" +
-        allowUserMarkers + ")");
-  }
+//  @SimpleFunction(description = "Specifies whether users will be able to add markers by clicking " +
+//      "on the map. True will make the map listen for clicks. False will unbind the listener.")
+//  //TODO (ajcolter) is there a better name that could be used?
+//  //TODO (ajcolter) make a map property instead?
+//  public void AllowUserMarkers(boolean allowUserMarkers) {
+//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().addListenersForMarkers(" +
+//        allowUserMarkers + ")");
+//  }
 
   /**
    * The center of the map is marked with a circle. The show parameter specifies if the circle is
@@ -877,16 +878,57 @@ public class WebMap extends AndroidViewComponent {
     webview.loadUrl("javascript:mapContainer.setCenter('" + coords + "')");
   }
 
-  public void GetCenter() {
-    //TODO (aj) write handler to capture this value
-    webview.loadUrl("javascript:mapContainer.getCenter()");
-//    return new YailList();
+//  public void GetCenter() {
+//    //TODO (aj) write handler to capture this value
+//    webview.loadUrl("javascript:mapContainer.getCenter()");
+////    return new YailList();
+//  }
+
+//  public String GetMap() {
+//    //TODO (aj) write handler to capture this value
+//    webview.loadUrl("javascript:mapContainer.getMap()");
+//    return "";
+//  }
+
+//  public YailList getAllMarkers() {
+//    //TODO (aj) write handler to capture this value
+//    webview.loadUrl("javascript:mapContainer.getAllMarkers()");
+//    return;
+//  }
+
+//  public Marker getMarker(String location) {
+//    webview.loadUrl("javascript:mapContainer.getMarker(" + location + ")");
+//    return Marker;
+//  }
+
+  @SimpleFunction(description = "Create a marker on the map.")
+  public void CreateMarker(String location, String title) {
+    webview.loadUrl("javascript:mapContainer.createMarker('" + location + "','" + title + "')");
+    //TODO (aj) return the marker object?
   }
 
-  public String GetGoogleMapObject() {
-    //TODO (aj) write handler to capture this value
-    webview.loadUrl("javascript:mapContainer.getGoogleMapObject()");
-    return "";
+//  @SimpleFunction(description = "Create markers from a JSON list of marker objects.")
+//  public void createMarkersFromList(JSONArray listOfMarkers) {
+//    webview.loadUrl("javascript:mapContainer.createMarkersFromList(" + listOfMarkers + ")");
+//  }
+
+  @SimpleFunction(description = "Display or hide the markers.")
+  public void ShowMarkers(boolean show) {
+    webview.loadUrl("javascript:mapContainer.showMarkers(" + show + ")");
+  }
+
+//  public void deleteMarker(Marker m) {
+//    webview.loadUrl("javascript:mapContainer.deleteMarker(" + m + ")");
+//  }
+
+  @SimpleFunction(description = "Deletes all markers on map.")
+  public void DeleteAllMarkers() {
+    webview.loadUrl("javascript:mapContainer.deleteAllMarkers()");
+  }
+
+  @SimpleFunction(description = "Pans to the marker specified by the ID (string representation of its location).")
+  public void PanToMarker(String markerId) {
+    webview.loadUrl("javascript:mapContainer.panToMarker(" + markerId + ")");
   }
 
   @SimpleFunction(description = "Sets the Zoom to the specified level by the zoom parameter.")
@@ -897,171 +939,12 @@ public class WebMap extends AndroidViewComponent {
       form.dispatchErrorOccurredEvent(form, "AddMarker", ErrorMessages.ERROR_INVALID_ZOOM_LEVEL);
   }
 
-  @SimpleFunction(description = "Gets the Zoom level by the zoom parameter.")
-  public int GetZoom() {
-    webview.loadUrl("javascript:mapContainer.getZoom()");
-    //TODO (ajcolter) how do I get the return value here??
-    return 0;
-  }
-
-  @SimpleFunction(description = "Shows all the markers currently available on the map, " +
-      "even those that might have been hidden by developer or user action.")
-  public void ShowMarkers(boolean show) {
-    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().showMarkers(" + show + ")");
-  }
-
-//  @SimpleFunction(description = "Deletes all markers currently on the map. This is a full delete." +
-//      " To simply hide markers from view please use the HideMarkers block.")
-//  public void DeleteMarkersFromMap() {
-//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().deleteMarkers()");
+//  @SimpleFunction(description = "Gets the Zoom level by the zoom parameter.")
+//  public int GetZoom() {
+//    webview.loadUrl("javascript:mapContainer.getZoom()");
+//    //TODO (ajcolter) how do I get the return value here??
+//    return 0;
 //  }
-
-  @SimpleFunction(description = "Places a marker in a location by providing its address instead " +
-      "of coordinates. An example could be '32 Vassar St. Cambridge MA'")
-  public void GeoLocate(String address) {
-    //TODO (aj) why doesn't this return the geolocation results? how is a map/marker going to use it? is it useful?
-    webview.loadUrl("javascript:mapContainer.getGeolocationFromAddress('" + address + "')");
-  }
-
-  @SimpleFunction(description = "Adds a marker to the map. To create a Marker use the Marker " +
-      "block, also available in WebMap.")
-  public void CreateMarkerObjectOnMap(String location, String title) {
-    //TODO (aj) create more of these blocks to take locations that are also google.maps.latlng instances, etc? or is
-    // string just simpler?
-    webview.loadUrl("javascript:mapContainer.createMarker("+location+ "," + title + ")");
-  }
-//  public void AddMarkerToMap(YailList marker) {
-//    String [] markerData = marker.toStringArray();
-//    String javaScriptCommand = "javascript:mapContainer.getMarkerFunctions().addAIMarker(mapContainer" +
-//        ".getMarkerFunctions().locationFromLatLngCoords(" + markerData[0] + ", " + markerData[1] +
-//        "),'" + markerData[2] + "', '" + markerData[3] + "')";
-//
-//    webview.loadUrl(javaScriptCommand);
-//  }
-  @SimpleFunction(description = "Creates a marker object; adds it to the map if map is not null.")
-  public void CreateMarkerObject(String map, long latitude, long longitude, String title, String icon, boolean
-      clickable, boolean visible) {
-    webview.loadUrl("javascript:markerContainer(" +map+ "," + latitude + "," + longitude + "," + title + "," +
-        icon + "," + clickable + "," +visible+")");
-  }
-
-
-  @SimpleFunction(description = "Creates and returns a Marker but does not directly add it to the" +
-      " map. To add it to the map you can use the AddMarkerToMap block. You can also store this " +
-      "marker in a List and use the block AddMarkersFromList. The range for latitude is [-90, 90]," +
-      " and the range for longitude is [-180, 180]. The id field is used to manage markers and " +
-      "actions over markers. If you don't need to manage markers you can use the value -1 and the" +
-      " map will handle ids automatically. The field title can be used as a more human readable " +
-      "id if you wanted to show all markers in a ListView or a ListPicker. The field content is " +
-      "used to add a paragraph of text to an InfoWindow that could be displayed when the user " +
-      "clicks on a marker.")
-  public YailList Marker(long latitude, long longitude, String title, String infoWindowContent) {
-
-    if ((-90.0 <= latitude && latitude <= 90.0) && (-180.0 <= longitude && longitude <= 180.0)){
-      ArrayList<String> values = new ArrayList<String>();
-      values.add(latitude + "");
-      values.add(longitude + "");
-      values.add(title + "");
-      values.add(infoWindowContent + "");
-      return YailList.makeList(values);
-    }
-    else {
-      form.dispatchErrorOccurredEvent(form, "Marker", ErrorMessages.ERROR_ILLEGAL_COORDS_FORMAT);
-    }
-
-    return YailList.makeList(new ArrayList()); // Return an empty list if we cannot create a marker
-  }
-
-  @SimpleFunction(description = "Shows a particular marker on the map by its id.")
-  public void ShowMarker(YailList marker, boolean show) {
-    String markerId = idForMarker(marker);
-    webview.loadUrl("javascript:thisMap.getMarkerFunctions().showMarker('" + markerId+ "', " +
-        show + ")");
-  }
-
-//TODO (aj) fix this -- make a new one based on removing the marker object from the map?
-//  @SimpleFunction(description = "Shows a particular marker on the map by its id.")
-//  public void ShowMarker(YailList marker, boolean show) {
-//    String markerId = idForMarker(marker);
-//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().showMarker('" + markerId+ "', " +
-//        show + ")");
-//  }
-
-
-  private String idForMarker(YailList marker) {
-    //TODO (aj) still using yaillists for markers? probably want to make the marker class right?
-    //String markerId = webview.loadUrl("javascript:"+marker+".prototype.getId();");//"(" + marker.getString(0) + ",
-    // " + marker.getString(1) +
-    // ")";
-    //return markerId;
-    return "Location";
-  }
-
-  @SimpleFunction(description = "Pan the map towards a particular marker on the map by its id.")
-  public void PanToMarker(YailList marker) {
-    String markerId = idForMarker(marker);
-    webview.loadUrl("javascript:mapContainer.panToMarker('" + markerId+ "')");
-  }
-
-//  @SimpleFunction(description = "A new marker with all properties unchanged except for the title of" +
-//      " the particular marker passed as a parameter. This title could be used as" +
-//      " a more human readable id to show and select markers in a ListView or ListPicker.")
-//  public YailList SetMarkerTitle(YailList marker, String title) {
-//    String markerId = idForMarker(marker);
-//    //create a new Marker object from the previous one. We cannot simply set position 3 to the
-//    // new title because YailList does not implement the set method.
-//    String markerValues [] = marker.toStringArray();
-//    markerValues[2] = title;
-//    YailList newMarker = YailList.makeList(markerValues);
-//    String javaScriptCommand = "javascript:mapContainer.getMarkerFunctions().setMarkerTitle('" +
-//        markerId + "', '" + title + "')";
-//    Log.d(LOG_TAG, "JS command for SetMarkerTitle is: " + javaScriptCommand);
-//    Log.d(LOG_TAG, "markerId for SetMarkerTitle is: " + markerId);
-//    webview.loadUrl(javaScriptCommand);
-//
-//    return newMarker;
-//  }
-
-//  @SimpleFunction(description = "Get the title of a particular marker.")
-//  public String GetMarkerTitle(YailList marker) {
-//    return marker.getString(2);
-//  }
-
-//  @SimpleFunction(description = "Get the InfoWindow content of a particular marker.")
-//  public String GetMarkerInfoWindowContent(YailList marker) {
-//    return marker.getString(3);
-//  }
-
-  //TODO (aj) update these functions based on how we use the marker object
-  @SimpleFunction(description = "Get the Latitude of a particular marker.")
-  public double GetMarkerLatitude(YailList marker) {
-    return Double.valueOf(marker.getString(0)).doubleValue();
-  }
-
-  @SimpleFunction(description = "Get the Longitude of a particular marker.")
-  public double GetMarkerLongitude(YailList marker) {
-    return Double.valueOf(marker.getString(1)).doubleValue();
-  }
-
-  @SimpleFunction(description = "This function requests a list of lists that contains all of the " +
-      "markers currently existing on the map. These markers can be hidden or visible, and " +
-      "could have been added by the AI developer or directly by the end user. This list of lists " +
-      "can be persisted with an additional component, such as TinyDB. This function triggers the " +
-      "event MarkersFromMapReceived when the list is received. Several lists of markers could be " +
-      "stored in the Screen and sent to the map with the block AddMarkersFromList.")
-  public void GetAllMarkersFromMap() { //may make more sense to name this GetListOfMarkers
-    webview.loadUrl("javascript:mapContainer.getAllMarkers()");
-  }
-
-  @SimpleFunction(description = "Visualizes a list of lists of markers in the map. This block " +
-      "could be used in combination with RequestListOfMarkersFromMap to manage different lists of " +
-      "markers within the same map. Note that the format must be a list of lists, " +
-      "and those lists should contain 4 elements (id, coordinates, title, content).")
-  public void AddMarkersFromList(YailList list) {
-    //TODO (ajcolter) make sure it is a List of Lists and convert it to JSON
-    String markersJSON = createStringifiedJSONFromYailList(list);
-    webview.loadUrl("javascript:mapContainer.addMarkersFromList('" + markersJSON + "')");
-  }
 
   /**
    * From a YailList of YailLists containing data for markers, serialize into a JSON object to
@@ -1089,33 +972,6 @@ public class WebMap extends AndroidViewComponent {
 
     return json.toString();
   }
-
-//  @SimpleFunction(description = "Creates an InfoWindow for a particular marker that can be " +
-//      "displayed on particular events (in combination with the open and close infoWindow blocks.)")
-//  public YailList CreateInfoWindow(YailList marker, String content) {
-//    String markerId = idForMarker(marker);
-//    //create a new Marker object from the previous one. We cannot simply set position 3 to the
-//    // new title because YailList does not implement the set method.
-//    String markerValues [] = marker.toStringArray();
-//    markerValues[3] = content;
-//    YailList newMarker = YailList.makeList(markerValues);
-//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().createInfoWindow('" +
-//        markerId + "', '" + content + "')");
-//
-//    return newMarker;
-//  }
-
-//  @SimpleFunction(description = "Open an InfoWindow for a particular marker.")
-//  public void OpenInfoWindow(YailList marker) {
-//    String markerId = idForMarker(marker);
-//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().openInfoWindow('" + markerId + "')");
-//  }
-//
-//  @SimpleFunction(description = "Close an InfoWindow for a particular marker.")
-//  public void CloseInfoWindow(YailList marker) {
-//    String markerId = idForMarker(marker);
-//    webview.loadUrl("javascript:mapContainer.getMarkerFunctions().closeInfoWindow('" + markerId+ "')");
-//  }
 
   @Override
   public View getView() {
@@ -1151,25 +1007,25 @@ public class WebMap extends AndroidViewComponent {
 //      YailList markerYail = createMarkerFromStringifiedJson(marker);
 //      EventDispatcher.dispatchEvent(this, "MarkerClicked", markerYail);
 //  }
-
-  private YailList createMarkerFromStringifiedJson(String jsonMarker){
-    YailList marker = YailList.makeList(new ArrayList());
-    try {
-      JSONObject object = new JSONObject(jsonMarker);
-
-      ArrayList<String> values = new ArrayList<String>();
-      values.add(object.getString("lat"));
-      values.add(object.getString("lng"));
-      values.add(object.getString("title"));
-      values.add(object.getString("info"));
-      marker = YailList.makeList(values);
-    } catch (JSONException e) {
-      //TODO (ajcolter) do something about this! Create an ErrorMessage for this
-      e.printStackTrace();
-      Log.d(LOG_TAG, "Problem parsing the JSON that came from the JavaScript Click handler");
-    }
-    return marker;
-  }
+//
+//  private YailList createMarkerFromStringifiedJson(String jsonMarker){
+//    YailList marker = YailList.makeList(new ArrayList());
+//    try {
+//      JSONObject object = new JSONObject(jsonMarker);
+//
+//      ArrayList<String> values = new ArrayList<String>();
+//      values.add(object.getString("lat"));
+//      values.add(object.getString("lng"));
+//      values.add(object.getString("title"));
+//      values.add(object.getString("info"));
+//      marker = YailList.makeList(values);
+//    } catch (JSONException e) {
+//      //TODO (ajcolter) do something about this! Create an ErrorMessage for this
+//      e.printStackTrace();
+//      Log.d(LOG_TAG, "Problem parsing the JSON that came from the JavaScript Click handler");
+//    }
+//    return marker;
+//  }
 
 //  /**
 //   * Event triggered by a marker being doubled clicked on the map. NOTE that a MarkerClicked event
@@ -1184,22 +1040,22 @@ public class WebMap extends AndroidViewComponent {
 //    YailList markerYail = createMarkerFromStringifiedJson(marker);
 //    EventDispatcher.dispatchEvent(this, "MarkerDoubleClicked", markerYail);
 //  }
-
-  @SimpleEvent(description = "Event triggered after a request made by the " +
-      "RequestListOfMarkersFromMap block. It returns a List of Lists with the information of all " +
-      "the markers currently available (hidden or visible) on the map.")
-  public void MarkersFromMapReceived(final YailList markersList) {
-    EventDispatcher.dispatchEvent(this, "MarkersFromMapReceived", markersList);
-  }
-
-  @SimpleEvent(description = "Event triggered after the map has finished loading and is ready to " +
-      "receive instructions. Anything done before the map is fully loaded might not have any " +
-      "effect.")
-  public void MapIsReady() {
-    SetCenter(initialLatLng);   // This should really be done when the map is loaded
-    //TODO (aj) can this happen on the JS side? Can it pull the gps info from the phone?
-    EventDispatcher.dispatchEvent(this, "MapIsReady");
-  }
+//
+//  @SimpleEvent(description = "Event triggered after a request made by the " +
+//      "RequestListOfMarkersFromMap block. It returns a List of Lists with the information of all " +
+//      "the markers currently available (hidden or visible) on the map.")
+//  public void MarkersFromMapReceived(final YailList markersList) {
+//    EventDispatcher.dispatchEvent(this, "MarkersFromMapReceived", markersList);
+//  }
+//
+//  @SimpleEvent(description = "Event triggered after the map has finished loading and is ready to " +
+//      "receive instructions. Anything done before the map is fully loaded might not have any " +
+//      "effect.")
+//  public void MapIsReady() {
+//    SetCenter(initialLatLng);   // This should really be done when the map is loaded
+//    //TODO (aj) can this happen on the JS side? Can it pull the gps info from the phone?
+//    EventDispatcher.dispatchEvent(this, "MapIsReady");
+//  }
 
 //  @SimpleEvent(description = "A user has added a marker by clicking on the map. This event will " +
 //      "trigger only if users are allowed to add markers by using the block AllowUserMarkers. " +
@@ -1238,11 +1094,11 @@ public class WebMap extends AndroidViewComponent {
       webViewForm.dispatchErrorOccurredEvent(webViewForm, "dispatchError", errorNumber);
     }
 
-    @JavascriptInterface
-    public YailList getCenterMarker(final String jsonMarker) {
-      Log.d(LOG_TAG, "Center marker: " + jsonMarker);
-      return createMarkerFromStringifiedJson(jsonMarker);
-    }
+//    @JavascriptInterface
+//    public YailList getCenterMarker(final String jsonMarker) {
+//      Log.d(LOG_TAG, "Center marker: " + jsonMarker);
+//      return createMarkerFromStringifiedJson(jsonMarker);
+//    }
 
 //    @JavascriptInterface
 //    public void handleMarker(final String jsonMarker) {
@@ -1299,16 +1155,16 @@ public class WebMap extends AndroidViewComponent {
 //      }
 //    }
 
-    @JavascriptInterface
-    public void mapIsReady() {
-      Log.d(LOG_TAG, "MAP IS READY IS BEING CALLED!");
-      webViewForm.runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-          MapIsReady();
-        }
-      });
-    }
+//    @JavascriptInterface
+//    public void mapIsReady() {
+//      Log.d(LOG_TAG, "MAP IS READY IS BEING CALLED!");
+//      webViewForm.runOnUiThread(new Runnable() {
+//        @Override
+//        public void run() {
+//          MapIsReady();
+//        }
+//      });
+//    }
 
 //    @JavascriptInterface
 //    public void userMarkerAdded(final String markerJson) {
