@@ -5865,6 +5865,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String CreateMarkerMethods();
 
+  @DefaultMessage("CreateMarkerFromAddress")
+  @Description("")
+  String CreateMarkerFromAddressMethods();
+
   @DefaultMessage("DeleteAllMarkers")
   @Description("")
   String DeleteAllMarkersMethods();

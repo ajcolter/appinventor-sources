@@ -87,7 +87,6 @@
         return map;
       }
 
-
       /**
        * Add a marker, with additional information, to the map.
        * @param location {google.maps.LatLng} object specifying the position in the map
@@ -107,11 +106,9 @@
         } else if (location.length == 2) {
           loc = locationFromLatLngCoords(location[0], location[1]);
         } else {
-          //try geolocating from address
-          //else throw error
-          console.log("No valid location.");
-          return null;
+            console.log("No valid location.");
         }
+
         lat = loc.lat();
         lng = loc.lng();
 
@@ -146,6 +143,30 @@
 
         return marker;
 
+      };
+
+      //Geolocation service
+      var createMarkerFromAddress = function (address, title) {
+        var geocoder = new google.maps.Geocoder();
+        var title = title;
+        geocoder.geocode({
+          address: address
+        }, function(results, status) {
+          if (status === 'OK') {
+          var firstLocationFound = results[0].geometry.location;
+          if (firstLocationFound) {
+            var marker = createMarker(firstLocationFound, title);
+            // var markerJson = m.createJsonMarker();
+            return firstLocationFound;
+          } else {
+            console.log('No location found!');
+          }
+        } else if (status === "ZERO_RESULTS") {
+          console.log('No results found for that particular address.');
+        } else {
+          console.log('No results found. Status of Geolocation call: ' + status);
+        }
+        });
       };
 
       /**
@@ -256,32 +277,6 @@
         }
       };
 
-      //Geolocation service
-      var getGeolocationFromAddress = function(address) {
-        var geocoder = new google.maps.Geocoder();
-        geocoder.geocode({
-          address: address
-        }, geolocationResults)
-      };
-
-      function geolocationResults(results, status) {
-        if (status === 'OK') {
-          var firstLocationFound = results[0].geometry.location;
-          if (firstLocationFound) {
-            console.log("First loc:", firstLocationFound);
-            var m = createMarker(firstLocationFound);
-            var markerJson = m.createJsonMarker();
-            return firstLocationFound;
-          } else {
-            console.log('No location found!');
-          }
-        } else if (status === "ZERO_RESULTS") {
-          console.log('No results found for that particular address.');
-        } else {
-          console.log('No results found. Status of Geolocation call: ' + status);
-        }
-      }
-
       var deleteAllMarkers = function() {
         for (var key in allMarkers) {
           getMarker(key).setMap(null);
@@ -325,6 +320,7 @@
         getAllMarkers: getAllMarkers,
         getMarker: getMarker,
         createMarker: createMarker,
+        createMarkerFromAddress: createMarkerFromAddress,
         createMarkersFromList: createMarkersFromList,
         showMarkers: showMarkers,
         deleteMarker: deleteMarker,

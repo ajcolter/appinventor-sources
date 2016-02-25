@@ -319,7 +319,6 @@ public class WebMap extends AndroidViewComponent {
         "        return map;\n" +
         "      }\n" +
         "\n" +
-        "\n" +
         "      /**\n" +
         "       * Add a marker, with additional information, to the map.\n" +
         "       * @param location {google.maps.LatLng} object specifying the position in the map\n" +
@@ -339,11 +338,9 @@ public class WebMap extends AndroidViewComponent {
         "        } else if (location.length == 2) {\n" +
         "          loc = locationFromLatLngCoords(location[0], location[1]);\n" +
         "        } else {\n" +
-        "          //try geolocating from address\n" +
-        "          //else throw error\n" +
-        "          console.log(\"No valid location.\");\n" +
-        "          return null;\n" +
+        "            console.log(\"No valid location.\");\n" +
         "        }\n" +
+        "\n" +
         "        lat = loc.lat();\n" +
         "        lng = loc.lng();\n" +
         "\n" +
@@ -378,6 +375,30 @@ public class WebMap extends AndroidViewComponent {
         "\n" +
         "        return marker;\n" +
         "\n" +
+        "      };\n" +
+        "\n" +
+        "      //Geolocation service\n" +
+        "      var createMarkerFromAddress = function (address, title) {\n" +
+        "        var geocoder = new google.maps.Geocoder();\n" +
+        "        var title = title;\n" +
+        "        geocoder.geocode({\n" +
+        "          address: address\n" +
+        "        }, function(results, status) {\n" +
+        "          if (status === 'OK') {\n" +
+        "          var firstLocationFound = results[0].geometry.location;\n" +
+        "          if (firstLocationFound) {\n" +
+        "            var marker = createMarker(firstLocationFound, title);\n" +
+        "            // var markerJson = m.createJsonMarker();\n" +
+        "            return firstLocationFound;\n" +
+        "          } else {\n" +
+        "            console.log('No location found!');\n" +
+        "          }\n" +
+        "        } else if (status === \"ZERO_RESULTS\") {\n" +
+        "          console.log('No results found for that particular address.');\n" +
+        "        } else {\n" +
+        "          console.log('No results found. Status of Geolocation call: ' + status);\n" +
+        "        }\n" +
+        "        });\n" +
         "      };\n" +
         "\n" +
         "      /**\n" +
@@ -488,32 +509,6 @@ public class WebMap extends AndroidViewComponent {
         "        }\n" +
         "      };\n" +
         "\n" +
-        "      //Geolocation service\n" +
-        "      var getGeolocationFromAddress = function(address) {\n" +
-        "        var geocoder = new google.maps.Geocoder();\n" +
-        "        geocoder.geocode({\n" +
-        "          address: address\n" +
-        "        }, geolocationResults)\n" +
-        "      };\n" +
-        "\n" +
-        "      function geolocationResults(results, status) {\n" +
-        "        if (status === 'OK') {\n" +
-        "          var firstLocationFound = results[0].geometry.location;\n" +
-        "          if (firstLocationFound) {\n" +
-        "            console.log(\"First loc:\", firstLocationFound);\n" +
-        "            var m = createMarker(firstLocationFound);\n" +
-        "            var markerJson = m.createJsonMarker();\n" +
-        "            return firstLocationFound;\n" +
-        "          } else {\n" +
-        "            console.log('No location found!');\n" +
-        "          }\n" +
-        "        } else if (status === \"ZERO_RESULTS\") {\n" +
-        "          console.log('No results found for that particular address.');\n" +
-        "        } else {\n" +
-        "          console.log('No results found. Status of Geolocation call: ' + status);\n" +
-        "        }\n" +
-        "      }\n" +
-        "\n" +
         "      var deleteAllMarkers = function() {\n" +
         "        for (var key in allMarkers) {\n" +
         "          getMarker(key).setMap(null);\n" +
@@ -557,6 +552,7 @@ public class WebMap extends AndroidViewComponent {
         "        getAllMarkers: getAllMarkers,\n" +
         "        getMarker: getMarker,\n" +
         "        createMarker: createMarker,\n" +
+        "        createMarkerFromAddress: createMarkerFromAddress,\n" +
         "        createMarkersFromList: createMarkersFromList,\n" +
         "        showMarkers: showMarkers,\n" +
         "        deleteMarker: deleteMarker,\n" +
@@ -906,6 +902,13 @@ public class WebMap extends AndroidViewComponent {
     webview.loadUrl("javascript:mapContainer.createMarker('" + location + "','" + title + "')");
     //TODO (aj) return the marker object?
   }
+
+  @SimpleFunction(description = "Create a marker on the map from an address.")
+  public void CreateMarkerFromAddress(String address, String title) {
+    webview.loadUrl("javascript:mapContainer.createMarkerFromAddress('" + address + "','" + title + "')");
+    //TODO (aj) return the marker object?
+  }
+
 
 //  @SimpleFunction(description = "Create markers from a JSON list of marker objects.")
 //  public void createMarkersFromList(JSONArray listOfMarkers) {
