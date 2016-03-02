@@ -181,12 +181,12 @@ public class Ode implements EntryPoint {
   // Remembers the current View
   static final int DESIGNER = 0;
   static final int PROJECTS = 1;
-  private static final int GALLERY = 2;
+  static final int GALLERY = 2;
   private static final int GALLERYAPP = 3;
   private static final int USERPROFILE = 4;
   private static final int PRIVATEUSERPROFILE = 5;
   private static final int MODERATIONPAGE = 6;
-  private static int currentView = DESIGNER;
+  private static int currentView = PROJECTS;
 
   /*
    * The following fields define the general layout of the UI as seen in the following diagram:
@@ -382,7 +382,6 @@ public class Ode implements EntryPoint {
     }
     currentView = PROJECTS;
     getTopToolbar().updateFileMenuButtons(currentView);
-    getTopPanel().updateTopMenuButtons(currentView);
     deckPanel.showWidget(projectsTabIndex);
     // If we started a project, then the start button was disabled (to avoid
     // a second press while the new project wizard was starting (aka we "debounce"
@@ -397,6 +396,7 @@ public class Ode implements EntryPoint {
   public void switchToGalleryView() {
     currentView = GALLERY;
     deckPanel.showWidget(galleryTabIndex);
+    getTopToolbar().updateFileMenuButtons(currentView);
   }
 
   /**
@@ -406,6 +406,7 @@ public class Ode implements EntryPoint {
     currentView = GALLERYAPP;
     GalleryAppBox.setApp(app, editStatus);
     deckPanel.showWidget(galleryAppTabIndex);
+    getTopToolbar().updateFileMenuButtons(currentView);
   }
 
   /**
@@ -417,6 +418,7 @@ public class Ode implements EntryPoint {
     OdeLog.log("###########" + userId + "||||||" + editStatus);
     ProfileBox.setProfile(userId, editStatus);
     deckPanel.showWidget(userProfileTabIndex);
+    getTopToolbar().updateFileMenuButtons(currentView);
   }
 
   /**
@@ -427,7 +429,6 @@ public class Ode implements EntryPoint {
     // ***** THE DESIGNER TAB DOES NOT DISPLAY CORRECTLY IF THERE IS NO CURRENT EDITOR. *****
     currentView = DESIGNER;
     getTopToolbar().updateFileMenuButtons(currentView);
-    getTopPanel().updateTopMenuButtons(currentView);
     if (currentFileEditor != null) {
       deckPanel.showWidget(designTabIndex);
     } else {
@@ -442,6 +443,7 @@ public class Ode implements EntryPoint {
   public void switchToPrivateUserProfileView() {
     currentView = privateUserProfileIndex;
     deckPanel.showWidget(privateUserProfileIndex);
+    getTopToolbar().updateFileMenuButtons(currentView);
   }
 
   /**
@@ -450,6 +452,7 @@ public class Ode implements EntryPoint {
   public void switchToModerationPageView() {
     currentView = MODERATIONPAGE;
     deckPanel.showWidget(moderationPageTabIndex);
+    getTopToolbar().updateFileMenuButtons(currentView);
   }
   /**
    * Switch to the Debugging tab
@@ -573,8 +576,7 @@ public class Ode implements EntryPoint {
       }
       assetManager.loadAssets(project.getProjectId());
     }
-    getTopToolbar().updateFileMenuButtons(1);
-    getTopPanel().updateTopMenuButtons(1);
+    getTopToolbar().updateFileMenuButtons(DESIGNER);
   }
 
   /**
@@ -986,6 +988,8 @@ public class Ode implements EntryPoint {
       });
 
       resizeWorkArea(debuggingTab);
+
+      getTopToolbar().updateFileMenuButtons(currentView);
     }
 
     // We do not select the designer tab here because at this point there is no current project.
@@ -1120,10 +1124,6 @@ public class Ode implements EntryPoint {
    */
   public TopToolbar getTopToolbar() {
     return topToolbar;
-  }
-
-  public TopPanel getTopPanel() {
-    return topPanel;
   }
 
   /**
@@ -1895,7 +1895,7 @@ public class Ode implements EntryPoint {
    * displayed.
    *
    * @param title The title for the dialog box
-   * @param message The message to display
+   * @param messageString The message to display
    * @param buttonString the name of the button, i.e., "OK"
    */
 
