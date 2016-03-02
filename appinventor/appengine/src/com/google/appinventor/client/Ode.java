@@ -1331,7 +1331,9 @@ public class Ode implements EntryPoint {
    */
   public DialogBox createNoProjectsDialog(boolean showDialog) {
     // Create the UI elements of the DialogBox
+
     final DialogBox dialogBox = new DialogBox(true, false); // DialogBox(autohide, modal)
+
     dialogBox.setStylePrimaryName("ode-DialogBox");
     dialogBox.setText(MESSAGES.createNoProjectsDialogText());
 
@@ -1363,7 +1365,7 @@ public class Ode implements EntryPoint {
     VerticalPanel contentPanel = new VerticalPanel();
 
     Label messageChunk1 = new HTML(MESSAGES.createNoProjectsDialogMessage1());
-    
+
     messageChunk1.setWidth("23em");
     Label messageChunk2 = new HTML(MESSAGES.createNoProjectsDialogMessage2());
 
