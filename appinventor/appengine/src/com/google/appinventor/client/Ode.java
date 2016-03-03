@@ -39,6 +39,7 @@ import com.google.appinventor.client.explorer.project.ProjectManagerEventAdapter
 import com.google.appinventor.client.explorer.youngandroid.GalleryPage;
 import com.google.appinventor.client.explorer.youngandroid.GalleryToolbar;
 import com.google.appinventor.client.explorer.youngandroid.ProjectToolbar;
+import com.google.appinventor.client.explorer.youngandroid.Walkthrough;
 import com.google.appinventor.client.jsonp.JsonpConnection;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.settings.Settings;
@@ -1346,6 +1347,7 @@ public class Ode implements EntryPoint {
         HasVerticalAlignment.ALIGN_MIDDLE);
 
     Image dialogImage = new Image(Ode.getImageBundle().androidGreenSmall());
+//    dialogImage.setPixelSize(80, 90);
 
     Grid messageGrid = new Grid(2, 1);
     messageGrid.getCellFormatter().setAlignment(0,
@@ -1370,6 +1372,8 @@ public class Ode implements EntryPoint {
     Button newProject = new Button(MESSAGES.startFirstProjectText());
     newProject.addClickListener(new ClickListener() {
       public void onClick(Widget sender) {
+        Walkthrough.displayDialog();
+        BlocklyPanel.callSetTutorial("Tutorial_Onboarding");
         dialogBox.hide();
         projectToolbar.createFirstNewProject();
       }
