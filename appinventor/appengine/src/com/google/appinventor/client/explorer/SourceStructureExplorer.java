@@ -164,9 +164,6 @@ public class SourceStructureExplorer extends Composite {
         int y = event.getNativeEvent().getClientY();
 
         cm.setPopupPosition(x, y);
-
-//        tree.getSelectedItem().setSelected(false);
-
         TreeItem treeItem = getTreeItemAt(x, y);
         OdeLog.log("Right clicked item " + treeItem.getText());
         tree.setSelectedItem(treeItem);
