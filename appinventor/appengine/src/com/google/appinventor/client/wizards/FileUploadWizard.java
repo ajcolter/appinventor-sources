@@ -16,6 +16,7 @@ import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.utils.Uploader;
 import com.google.appinventor.client.youngandroid.TextValidators;
+import com.google.appinventor.components.annotations.UsesLibraries;
 import com.google.appinventor.shared.rpc.ServerLayout;
 import com.google.appinventor.shared.rpc.UploadResponse;
 import com.google.appinventor.shared.rpc.project.FileNode;
@@ -24,17 +25,19 @@ import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetsFolder;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+//import org.moxieapps.gwt.uploader.client.Uploader;
 
 /**
  * Wizard for uploading individual files.
  *
  */
+@UsesLibraries(libraries = "moxieuploader.jar")
 public class FileUploadWizard extends Wizard {
   /**
    * Interface for callback to execute after a file is uploaded.
@@ -75,6 +78,15 @@ public class FileUploadWizard extends Wizard {
     VerticalPanel panel = new VerticalPanel();
     panel.setVerticalAlignment(VerticalPanel.ALIGN_MIDDLE);
     panel.add(upload);
+
+    Label progress = new Label();
+//    final Uploader uploader = new Uploader()
+//        .setUploadURL("/FileUploadServlet")
+//        .setButtonText("Upload Files")
+//        .setButtonWidth(150)
+//        .setButtonHeight(22);
+
+
     addPage(panel);
 
     // Create finish command (upload a file)
